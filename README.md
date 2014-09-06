@@ -29,30 +29,30 @@ go get github.com/mattes/fugu
 
 # Usage
 
-1. Create ``fugu.yml``
+1) Create ``fugu.yml``
 
-Create a ``fugu.yml`` file (maybe next to Dockerfile) and specify ``docker run``
-options ([reference](http://docs.docker.com/reference/commandline/cli/#run)). 
-Valid variables are ``image``, ``command``, ``args``, and all other option variables
-like ``publish`` or ``name``. The yaml file looks nicer if you don't use the
-one-letter alias variables.
+  Create a ``fugu.yml`` file (maybe next to Dockerfile) and specify ``docker run``
+  options ([reference](http://docs.docker.com/reference/commandline/cli/#run)). 
+  Valid variables are ``image``, ``command``, ``args``, and all other option variables
+  like ``publish`` or ``name``. The yaml file looks nicer if you don't use the
+  one-letter alias variables.
 
-```yml
-name: hello-world-nginx
-image: mattes/hello-world-nginx
-detach: true
-publish: 
-  - 80:80
-```
+  ```yml
+  name: hello-world-nginx
+  image: mattes/hello-world-nginx
+  detach: true
+  publish: 
+    - 80:80
+  ```
 
-2. Use ``fugu`` to run container
+2) Use ``fugu`` to run container
 
-```bash
-# in directory where fugu.yml is saved
-fugu run
-```
+  ```bash
+  # in directory where fugu.yml is saved
+  fugu run
+  ```
 
-3. Profit!
+3) Profit!
 
 
 # Advanced usage
@@ -62,9 +62,7 @@ fugu run [fugu.yml-path] [label] [docker-run-options] [image] [command] [args]
 fugu build [fugu.yml-path] [label] [docker-build-options] [path=pwd|url|-]
 ```
 
-## What are labels?
-
-See an example ``fugu.yml``:
+Labels can be used for different configuration settings. See an example ``fugu.yml``:
 
 ```yml
 production: &production
@@ -83,4 +81,4 @@ development:
     - 8080:80
 ```
 
-When no ``label`` argument is given, ``fugu`` will use the first label in ``fugu.yml``.
+When no label argument is given, fugu will use the first label found in ``fugu.yml``.
