@@ -8,7 +8,7 @@ The project uses a microservice architecture and consists of >15 docker images.
 During development a docker container is built, run and destroyed quite often.
 With fugu we can speed up this workflow, because all ``docker run`` arguments
 are stored in the ``fugu.yml`` file. We also used to put ``docker run`` statements 
-in ``README.md`, but the format wasn't consistent. Now ``fugu.yml`` is our second point of contact 
+in ``README.md``, but the format wasn't consistent. Now ``fugu.yml`` is our second point of contact 
 (after the Dockerfile itself), when looking at a new docker image. 
 We didn't want to use fig, because the set of containers we run during
 development changes often and we didn't want to keep one ``fig.yml`` for every
