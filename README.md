@@ -30,7 +30,7 @@ go get github.com/mattes/fugu
 # Usage
 
 1) Create a ``fugu.yml`` file (maybe next to Dockerfile) and specify ``docker run``
-([options](http://docs.docker.com/reference/commandline/cli/#run)). 
+[options](http://docs.docker.com/reference/commandline/cli/#run). 
 Valid variables are ``image``, ``command``, ``args``, and all other option variables
 like ``publish`` or ``name``. The YAML file looks nicer if you don't use the
 one-letter alias variables.
@@ -43,7 +43,7 @@ publish:
   - 80:80
 ```
 
-2) Use ``fugu`` to run container
+2) Use ``fugu`` to run the container
 
 ```bash
 # in directory where fugu.yml is saved
