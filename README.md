@@ -1,7 +1,7 @@
 fugu
 ====
 
-## fugu helps you to quickly run a container by storing arguments in a YAML file.
+#### fugu helps you to quickly run a container by storing arguments in a YAML file.
 
 __Why?__ We are working on [developermail.io](https://developermail.io) atm. 
 The project uses a microservice architecture and consists of >15 docker images. 
