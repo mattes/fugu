@@ -1,7 +1,7 @@
 fugu
 ====
 
-### fugu helps you to quickly run a container by storing arguments in a YAML file.
+## fugu helps you to quickly run a container by storing arguments in a YAML file.
 
 __Why?__ We are working on [developermail.io](https://developermail.io) atm. 
 The project uses a microservice architecture and consists of >15 docker images. 
@@ -29,28 +29,26 @@ go get github.com/mattes/fugu
 
 # Usage
 
-1) Create ``fugu.yml``
+1) Create a ``fugu.yml`` file (maybe next to Dockerfile) and specify ``docker run``
+([options](http://docs.docker.com/reference/commandline/cli/#run)). 
+Valid variables are ``image``, ``command``, ``args``, and all other option variables
+like ``publish`` or ``name``. The YAML file looks nicer if you don't use the
+one-letter alias variables.
 
-  Create a ``fugu.yml`` file (maybe next to Dockerfile) and specify ``docker run``
-  options ([reference](http://docs.docker.com/reference/commandline/cli/#run)). 
-  Valid variables are ``image``, ``command``, ``args``, and all other option variables
-  like ``publish`` or ``name``. The yaml file looks nicer if you don't use the
-  one-letter alias variables.
-
-  ```yml
-  name: hello-world-nginx
-  image: mattes/hello-world-nginx
-  detach: true
-  publish: 
-    - 80:80
-  ```
+```yml
+name: hello-world-nginx
+image: mattes/hello-world-nginx
+detach: true
+publish: 
+  - 80:80
+```
 
 2) Use ``fugu`` to run container
 
-  ```bash
-  # in directory where fugu.yml is saved
-  fugu run
-  ```
+```bash
+# in directory where fugu.yml is saved
+fugu run
+```
 
 3) Profit!
 
