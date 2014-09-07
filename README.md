@@ -1,6 +1,8 @@
 fugu
 ====
 
+[![Build Status](https://travis-ci.org/mattes/fugu.svg?branch=master)](https://travis-ci.org/mattes/fugu)
+
 __fugu helps you to quickly run a container by storing arguments in a YAML file.__
 
 __Why?__ We are working on [developermail.io](https://developermail.io) atm. 
@@ -31,13 +33,13 @@ go get github.com/mattes/fugu
 
 1) Create a ``fugu.yml`` file (maybe next to Dockerfile) and specify ``docker run``
 [options](http://docs.docker.com/reference/commandline/cli/#run). 
-Valid variables are ``image``, ``command``, ``args``, and all other option variables
+Valid variables are ``image`` (mandatory), ``command``, ``args``, and all other option variables
 like ``publish`` or ``name``. The YAML file looks nicer if you don't use the
 one-letter alias variables.
 
 ```yml
 name: hello-world-nginx
-image: mattes/hello-world-nginx
+image: mattes/hello-world-nginx # mandatory
 detach: true
 publish: 
   - 80:80
