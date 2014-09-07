@@ -1,16 +1,12 @@
 package main
 
 import (
-	_ "crypto/tls"
 	_ "flag"
 	"fmt"
-	"github.com/docker/docker/api"
-	"github.com/docker/docker/api/client"
-	// "github.com/docker/docker/runconfig"
 	"github.com/mattes/fugu/file"
 	"os"
 	"path"
-	"strings"
+	_ "strings"
 )
 
 var fileNamePaths = []string{"fugu.yml", "fugu.yaml", ".fugu.yml", ".fugu.yaml"}
@@ -34,6 +30,11 @@ func main() {
 
 	args := os.Args
 	argsLen := len(args)
+
+	if argsLen <= 1 {
+		fmt.Println("no cmd")
+		os.Exit(1)
+	}
 
 	command := args[1]
 	fugufilePath := ""
@@ -101,6 +102,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	_ = fuguConfig
+
 	// now do docker option parsing
 	offsetCount := 2
 	if fugufilePathGiven {
@@ -110,43 +113,12 @@ func main() {
 		offsetCount += 1
 	}
 
-	dockerArgs := ""
+	dockerArgs := []string{} // []string{strings.TrimSpace(fuguConfig["image"].(string))}
 	if argsLen >= offsetCount {
-		dockerArgs = fuguConfig["image"].(string) + " " + strings.Join(args[offsetCount:], " ")
+		dockerArgs = append(dockerArgs, args[offsetCount:]...)
 	}
 
-	defaultHost := os.Getenv("DOCKER_HOST")
-	if defaultHost == "" {
-		defaultHost = fmt.Sprintf("unix://%s", api.DEFAULTUNIXSOCKET)
-	}
-
-	_, err = api.ValidateHost(defaultHost)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(2)
-	}
-
-	protoAddrParts := strings.SplitN(defaultHost, "://", 2)
-
-	d := client.NewDockerCli(os.Stdin, os.Stdout, os.Stderr, protoAddrParts[0], protoAddrParts[1], nil)
 	fmt.Println(dockerArgs)
-	d.CmdRun(dockerArgs)
-
-	// fmt.Println("docker parsing")
-	// config, _, flagSet, err := runconfig.Parse(args[offsetCount-1:], nil)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	os.Exit(1)
-	// }
-
-	// _ = flagSet
-
-	// // fmt.Printf("%+v", flagSet)
-	// fmt.Printf("%v\n", config.Cmd)
-
-	// fmt.Println(config.Image)
-
-	os.Exit(1)
 
 	switch command {
 	case "run":
