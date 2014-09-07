@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"github.com/mattes/yaml"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-var tests = []struct {
+var parseTests = []struct {
 	data     []byte
 	fuguFile *FuguFile
 	err      bool
@@ -24,7 +26,7 @@ image: mattes/foobar
 		false,
 	},
 
-	// 	// test labels
+	// test labels
 	{
 		[]byte(`
 default:
@@ -68,17 +70,116 @@ bar:
 		},
 		false,
 	},
+
+	// test missing image
+	{
+		[]byte(`
+name: test
+`),
+		&FuguFile{},
+		true,
+	},
+
+	// test image only
+	{
+		[]byte(`
+image: test
+`),
+		&FuguFile{
+			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"default", 0}: map[interface{}]interface{}{"image": "test"}},
+		},
+		false,
+	},
+
+	// 	test missing image when using labels
+	{
+		[]byte(`
+default:
+  name: test
+`),
+		&FuguFile{},
+		true,
+	},
+
+	// test image only when using labels
+	{
+		[]byte(`
+label1:
+  image: test
+`),
+		&FuguFile{
+			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"label1", 0}: map[interface{}]interface{}{"image": "test"}},
+		},
+		false,
+	},
+
+	// test empy
+	{
+		[]byte(""),
+		&FuguFile{},
+		true,
+	},
+
+	// test bullshit
+	{
+		[]byte(`label1:`),
+		&FuguFile{},
+		true,
+	},
+	{
+		[]byte(`default`),
+		&FuguFile{},
+		true,
+	},
+	{
+		[]byte(`default:`),
+		&FuguFile{},
+		true,
+	},
+	{
+		[]byte(`
+default:
+  - hmm
+`),
+		&FuguFile{},
+		true,
+	},
 }
 
 func TestParse(t *testing.T) {
-	for _, tt := range tests {
+	for _, tt := range parseTests {
 		fuguFile, err := Parse(tt.data)
-		if err != nil && tt.err == false {
-			t.Fatalf("Expected no err, but got one: %v.\n%s", err, tt)
-		} else if err == nil && tt.err == true {
-			t.Fatalf("Expected err, but gone none. %s", tt)
+		if !tt.err {
+			require.NoError(t, err, fmt.Sprintf("%s", tt))
+		} else if tt.err {
+			require.Error(t, err, fmt.Sprintf("%s", tt))
 		}
 		assert.Equal(t, tt.fuguFile.Data, fuguFile.Data)
-		t.Error(fuguFile.Data)
+	}
+}
+
+var getConfigTests = []struct {
+	filepath string
+	label    string
+	config   map[string]interface{}
+	err      bool
+}{
+	{
+		"fugu.example.yml",
+		"",
+		map[string]interface{}{"name": "hello", "image": "mattes/hello"},
+		false,
+	},
+}
+
+func TestGetConfig(t *testing.T) {
+	for _, tt := range getConfigTests {
+		config, err := GetConfig(tt.filepath, tt.label)
+		if !tt.err {
+			require.NoError(t, err, fmt.Sprintf("%s", tt))
+		} else if tt.err {
+			require.Error(t, err, fmt.Sprintf("%s", tt))
+		}
+		assert.Equal(t, tt.config, config)
 	}
 }
