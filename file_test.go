@@ -167,7 +167,19 @@ var getConfigTests = []struct {
 	{
 		"fugu.example.yml",
 		"",
-		map[string]interface{}{"name": "hello", "image": "mattes/hello"},
+		map[string]interface{}{"image": "a-team/action", "detach": true},
+		false,
+	},
+	{
+		"fugu.example.yml",
+		"a-team",
+		map[string]interface{}{"image": "a-team/action", "detach": true},
+		false,
+	},
+	{
+		"fugu.example.yml",
+		"hannibal",
+		map[string]interface{}{"image": "a-team/action", "detach": false, "command": "echo", "args": []interface{}{"I love it when a plan comes together."}, "rm": true},
 		false,
 	},
 }

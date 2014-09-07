@@ -89,7 +89,6 @@ func GetConfig(filepath, label string) (config map[string]interface{}, err error
 		for k, v := range fugufile.Data {
 			if k.Index == 0 {
 				foundConfig = v.(map[interface{}]interface{})
-				fmt.Println(v)
 				break
 			}
 		}
@@ -98,7 +97,6 @@ func GetConfig(filepath, label string) (config map[string]interface{}, err error
 		for k, v := range fugufile.Data {
 			if k.Value == label {
 				foundConfig = v.(map[interface{}]interface{})
-				fmt.Println(v)
 				break
 			}
 		}
