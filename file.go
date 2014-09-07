@@ -1,7 +1,8 @@
 package main
 
 import (
-	"gopkg.in/yaml.v1"
+	_ "fmt"
+	"github.com/mattes/yaml"
 )
 
 var fileNamePaths = []string{"fugu.yml", "fugu.yaml", ".fugu.yml", ".fugu.yaml"}
@@ -9,7 +10,7 @@ var fileNamePaths = []string{"fugu.yml", "fugu.yaml", ".fugu.yml", ".fugu.yaml"}
 type FuguFile struct {
 	Path     string
 	FileName string
-	Data     map[string]interface{}
+	Data     map[yaml.StringIndex]interface{}
 }
 
 func Parse(data []byte) (*FuguFile, error) {
@@ -19,10 +20,10 @@ func Parse(data []byte) (*FuguFile, error) {
 	}
 
 	// are labels used?
-	if _, ok := f.Data["image"]; ok {
-		// no labels are used ...
-		f.Data = map[string]interface{}{"default": f.Data}
-	}
+	// if _, ok := f.Data["image"]; ok {
+	// 	// no labels are used ...
+	// 	f.Data = map[string]interface{}{"default": f.Data}
+	// }
 
 	return f, nil
 }
