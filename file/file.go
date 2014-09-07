@@ -7,8 +7,6 @@ import (
 	"io/ioutil"
 )
 
-var fileNamePaths = []string{"fugu.yml", "fugu.yaml", ".fugu.yml", ".fugu.yaml"}
-
 type FuguFile struct {
 	Path     string
 	FileName string
@@ -69,11 +67,26 @@ func Parse(data []byte) (*FuguFile, error) {
 	return f, nil
 }
 
-func Find(dir string) (filepath string, err error) {
-	return "", nil
+func GetLabels(filepath string) ([]string, error) {
+	// TODO(mattes) refactor
+	content, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+	fugufile, err := Parse(content)
+	if err != nil {
+		return nil, err
+	}
+
+	labels := make([]string, 0)
+	for k, _ := range fugufile.Data {
+		labels = append(labels, k.Value)
+	}
+	return labels, nil
 }
 
 func GetConfig(filepath, label string) (config map[string]interface{}, err error) {
+	// TODO(mattes) refactor
 	content, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return nil, err
