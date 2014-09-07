@@ -1,7 +1,7 @@
 package main
 
 import (
-	"reflect"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -17,7 +17,7 @@ name: test
 image: mattes/foobar
 `),
 		&FuguFile{
-			Data: map[string]interface{}{"default": map[interface{}]interface{}{"name": "test", "image": "mattes/foobar"}},
+			Data: map[string]interface{}{"default": map[string]interface{}{"name": "test", "image": "mattes/foobar"}},
 		},
 		false,
 	},
@@ -76,8 +76,6 @@ func TestParse(t *testing.T) {
 		} else if err == nil && tt.err == true {
 			t.Fatalf("Expected err, but gone none. %s", tt)
 		}
-		if reflect.DeepEqual(tt.fuguFile.Data, fuguFile.Data) == false {
-			t.Errorf("Expected %s, got %s", tt.fuguFile.Data, fuguFile.Data)
-		}
+		assert.Equal(t, tt.fuguFile.Data, fuguFile.Data)
 	}
 }
