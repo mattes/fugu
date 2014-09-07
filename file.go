@@ -20,10 +20,19 @@ func Parse(data []byte) (*FuguFile, error) {
 	}
 
 	// are labels used?
-	// if _, ok := f.Data["image"]; ok {
-	// 	// no labels are used ...
-	// 	f.Data = map[string]interface{}{"default": f.Data}
-	// }
+	usesLabels := true
+	newFlatData := make(map[interface{}]interface{}) // as per yaml pkg default
+	for k, v := range f.Data {
+		newFlatData[k.Value] = v
+		if k.Value == "image" {
+			// found image variable in level 1, thus no labels are used
+			usesLabels = false
+		}
+	}
+	if !usesLabels {
+		// set default label
+		f.Data = map[yaml.StringIndex]interface{}{yaml.StringIndex{Index: 0, Value: "default"}: newFlatData}
+	}
 
 	return f, nil
 }

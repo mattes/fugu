@@ -12,6 +12,19 @@ var tests = []struct {
 	err      bool
 }{
 
+	// test if default label is set if none is present
+	{
+		[]byte(`
+name: test
+image: mattes/foobar
+`),
+		&FuguFile{
+			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"default", 0}: map[interface{}]interface{}{"name": "test", "image": "mattes/foobar"}},
+		},
+		false,
+	},
+
+	// 	// test labels
 	{
 		[]byte(`
 default:
@@ -20,67 +33,41 @@ default:
 `),
 		&FuguFile{
 			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"default", 0}: map[interface{}]interface{}{"name": "test", "image": "mattes/foobar"}},
-			// Data: map[yaml.IndexMap0]interface{}{yaml.IndexMap0{Tag: "!!str", Value: "default", Index: 0}: map[interface{}]interface{}{"name": "test", "image": "mattes/foobar"}},
 		},
 		false,
 	},
 
-	// 	// set default label
-	// 	{
-	// 		[]byte(`
-	// name: test
-	// image: mattes/foobar
-	// `),
-	// 		&FuguFile{
-	// 			Data: map[string]interface{}{"default": map[string]interface{}{"name": "test", "image": "mattes/foobar"}},
-	// 		},
-	// 		false,
-	// 	},
+	// test maps
+	{
+		[]byte(`
+default:
+  name: test
+  image: mattes/foobar
+  publish:
+    - 8080:80
+`),
+		&FuguFile{
+			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"default", 0}: map[interface{}]interface{}{"name": "test", "image": "mattes/foobar", "publish": []interface{}{"8080:80"}}},
+		},
+		false,
+	},
 
-	// 	// test labels
-	// 	{
-	// 		[]byte(`
-	// default:
-	//   name: test
-	//   image: mattes/foobar
-	// `),
-	// 		&FuguFile{
-	// 			Data: map[string]interface{}{"default": map[interface{}]interface{}{"name": "test", "image": "mattes/foobar"}},
-	// 		},
-	// 		false,
-	// 	},
+	// test inheritance
+	{
+		[]byte(`
+foo: &foo
+  name: test
+  image: mattes/foobar
 
-	// 	// test maps
-	// 	{
-	// 		[]byte(`
-	// default:
-	//   name: test
-	//   image: mattes/foobar
-	//   publish:
-	//     - 8080:80
-	// `),
-	// 		&FuguFile{
-	// 			Data: map[string]interface{}{"default": map[interface{}]interface{}{"name": "test", "image": "mattes/foobar", "publish": []interface{}{"8080:80"}}},
-	// 		},
-	// 		false,
-	// 	},
-
-	// 	// test inheritance
-	// 	{
-	// 		[]byte(`
-	// foo: &foo
-	//   name: test
-	//   image: mattes/foobar
-
-	// bar:
-	//   <<: *foo
-	//   image: mattes/foobar2
-	// `),
-	// 		&FuguFile{
-	// 			Data: map[string]interface{}{"foo": map[interface{}]interface{}{"name": "test", "image": "mattes/foobar"}, "bar": map[interface{}]interface{}{"name": "test", "image": "mattes/foobar2"}},
-	// 		},
-	// 		false,
-	// 	},
+bar:
+  <<: *foo
+  image: mattes/foobar2
+`),
+		&FuguFile{
+			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"foo", 0}: map[interface{}]interface{}{"name": "test", "image": "mattes/foobar"}, yaml.StringIndex{"bar", 1}: map[interface{}]interface{}{"name": "test", "image": "mattes/foobar2"}},
+		},
+		false,
+	},
 }
 
 func TestParse(t *testing.T) {
