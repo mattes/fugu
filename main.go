@@ -136,10 +136,6 @@ func main() {
 
 	switch command {
 	case "run":
-		// fmt.Println(len(dockerArgs))
-		// fmt.Printf("%#v\n", fuguConfig)
-
-		// map[image:a-team/action detach:false command:echo args:[I love it when a plan comes together.] rm:false publish:[50:50 4:4]]
 
 		execArgs := []string{"run"}
 
