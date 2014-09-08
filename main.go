@@ -119,7 +119,20 @@ func main() {
 
 	// merge config from fugufile
 	for k, v := range options {
-		fuguConfig[k] = v
+		switch v.(type) {
+		case []string:
+			if len(v.([]string)) > 0 {
+				fuguConfig[k] = v
+			}
+
+		case string:
+			if v.(string) != "" {
+				fuguConfig[k] = v
+			}
+
+		default:
+			fuguConfig[k] = v
+		}
 	}
 
 	dockerCommand := ""

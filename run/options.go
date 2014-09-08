@@ -5,6 +5,8 @@ import (
 	"github.com/docker/docker/opts"
 	"github.com/docker/docker/pkg/mflag"
 	"io/ioutil"
+	"strconv"
+	"strings"
 )
 
 func Parse(args []string) (map[string]interface{}, *mflag.FlagSet, error) {
@@ -117,6 +119,39 @@ func Parse(args []string) (map[string]interface{}, *mflag.FlagSet, error) {
 	config["lxc-conf"] = lxcConfL.GetAll()
 	config["cap-add"] = capAddL.GetAll()
 	config["cap-drop"] = capDropL.GetAll()
+
+	cmd.VisitAll(func(f *mflag.Flag) {
+		var name string
+		if len(f.Names) == 2 {
+			name = f.Names[1]
+		} else if len(f.Names) == 1 {
+			name = f.Names[0]
+		}
+
+		name = strings.Trim(name, "#-")
+
+		if v, ok := config[name]; ok {
+			switch v.(type) {
+			case string:
+				if f.DefValue == v.(string) {
+					delete(config, name)
+				}
+			case bool:
+				b, err := strconv.ParseBool(f.DefValue)
+				if err == nil && b == v.(bool) {
+					delete(config, name)
+				}
+
+			case int64:
+				i, err := strconv.ParseInt(f.DefValue, 10, 0)
+				if err == nil && i == v.(int64) {
+					delete(config, name)
+				}
+			}
+
+		}
+
+	})
 
 	return config, cmd, nil
 }
