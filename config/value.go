@@ -14,6 +14,7 @@ type Value interface {
 	// yaml.Setter
 	Names() []string
 	Set(value interface{}) error
+	Get() interface{}
 
 	// Args returns a slice of strings to be used in exec args.
 	Arg() string
@@ -53,6 +54,10 @@ func (v *StringSliceValue) Set(value interface{}) error {
 	return nil
 }
 
+func (v *StringSliceValue) Get() interface{} {
+	return v.Value
+}
+
 func (v *StringSliceValue) Names() []string {
 	return v.Name
 }
@@ -72,12 +77,23 @@ func (v *BoolValue) Arg() (out string) {
 
 func (v *BoolValue) Set(value interface{}) error {
 	v.Defined = true
-	v2, err := strconv.ParseBool(value.(string))
-	if err != nil {
-		return err
+	switch value.(type) {
+	case string:
+		v2, err := strconv.ParseBool(value.(string))
+		if err != nil {
+			return err
+		}
+		v.Value = v2
+	case bool:
+		v.Value = value.(bool)
+	default:
+		return ErrInvalidStringSliceValue
 	}
-	v.Value = v2
 	return nil
+}
+
+func (v *BoolValue) Get() interface{} {
+	return v.Value
 }
 
 func (v *BoolValue) Names() []string {
@@ -107,6 +123,10 @@ func (v *Int64Value) Set(value interface{}) error {
 	return nil
 }
 
+func (v *Int64Value) Get() interface{} {
+	return v.Value
+}
+
 func (v *Int64Value) Names() []string {
 	return v.Name
 }
@@ -128,6 +148,10 @@ func (v *StringValue) Set(value interface{}) error {
 	v.Defined = true
 	v.Value = fmt.Sprintf("%v", value)
 	return nil
+}
+
+func (v *StringValue) Get() interface{} {
+	return v.Value
 }
 
 func (v *StringValue) Names() []string {

@@ -58,6 +58,35 @@ func Load(args []string, conf *[]config.Value) error {
 		return err
 	}
 
+	// check remaining args
+	rrags := cmd.Args()
+	var dockerCommand string
+	var dockerArgs []string
+	if len(rrags) == 1 {
+		dockerCommand = rrags[0]
+	} else if len(rrags) >= 2 {
+		dockerCommand = rrags[0]
+		dockerArgs = rrags[1:]
+	}
+
+	// populate into config.Value ...
+	if dockerCommand != "" {
+		var isSet int
+		for _, c := range *conf {
+			if c.Names()[0] == "command" {
+				c.Set(dockerCommand)
+				isSet += 1
+			}
+			if c.Names()[0] == "args" {
+				c.Set(dockerArgs)
+				isSet += 1
+			}
+			if isSet >= 2 {
+				break
+			}
+		}
+	}
+
 	var err error
 	cmd.VisitAll(func(f *mflag.Flag) {
 

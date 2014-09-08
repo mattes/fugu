@@ -25,7 +25,6 @@ var loadTests = []struct {
 }
 
 func TestLoad(t *testing.T) {
-
 	for _, tt := range loadTests {
 		c := []config.Value{
 			&config.StringValue{Name: []string{"name"}},

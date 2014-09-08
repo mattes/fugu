@@ -2,223 +2,229 @@ package main
 
 import (
 	// "bufio"
-	"fmt"
-	"github.com/docker/docker/pkg/mflag"
-	"github.com/mattes/fugu/file"
-	"github.com/mattes/fugu/run"
+	// "fmt"
+	// "github.com/docker/docker/pkg/mflag"
+	// "github.com/mattes/fugu/file"
+
 	_ "io"
 	"os"
-	"os/exec"
+	// "os/exec"
+	"github.com/mattes/fugu/cli"
 	"path"
 	_ "strings"
 )
 
-var fileNamePaths = []string{"fugu.yml", "fugu.yaml", ".fugu.yml", ".fugu.yaml"}
+var fugufileSearchFiles = []string{"fugu.yml", "fugu.yaml", ".fugu.yml", ".fugu.yaml"}
 
 // fugu run [fugu.yml-path] [label] [docker-run-options + --image] [command] [args]
 // fugu build [fugu.yml-path] [label] [docker-build-options] [path=pwd|url|-]
 
 func main() {
-	if len(fileNamePaths) == 0 {
+
+	if len(fugufileSearchFiles) == 0 {
 		panic("Specify at least one fileNamePath!")
 	}
 
-	args := os.Args
-	argsLen := len(args)
+	// cli.FindFugufile(fugufileSearchFiles)
 
-	if argsLen <= 1 {
-		fmt.Println("no cmd")
-		os.Exit(1)
-	}
+	cli.CmdRun("fugu.example.yml", os.Args[1:], "")
 
-	command := args[1]
-	fugufilePath := ""
-	fugufilePathGiven := false
-	label := ""
-	labelGiven := false
+	// 	args := os.Args
+	// 	argsLen := len(args)
 
-	// extract fugufile and label if given
-	args1 := make([]string, 0)
-	if argsLen >= 4 {
-		args1 = args[2:4]
-	} else if argsLen >= 3 {
-		args1 = args[2:3]
-	}
+	// 	if argsLen <= 1 {
+	// 		fmt.Println("no cmd")
+	// 		os.Exit(1)
+	// 	}
 
-	// check if fugufile
-	exts := fileExtensions(fileNamePaths)
-	for _, f := range args1 {
-		if isFuguFile(f, exts) {
-			fugufilePath = f
-			fugufilePathGiven = true
-			break
-		}
-	}
+	// 	command := args[1]
+	// 	fugufilePath := ""
+	// 	fugufilePathGiven := false
+	// 	label := ""
+	// 	labelGiven := false
 
-	if fugufilePath == "" {
-		for _, f := range fileNamePaths {
-			if fileExists(f) {
-				fugufilePath = f
-				break
-			}
-		}
-		if fugufilePath == "" {
-			fmt.Printf("%s not found\n", fileNamePaths[0])
-			os.Exit(1)
-		}
+	// 	// extract fugufile and label if given
+	// 	args1 := make([]string, 0)
+	// 	if argsLen >= 4 {
+	// 		args1 = args[2:4]
+	// 	} else if argsLen >= 3 {
+	// 		args1 = args[2:3]
+	// 	}
 
-	} else {
-		if !fileExists(fugufilePath) {
-			fmt.Printf("%s not found\n", fugufilePath)
-			os.Exit(1)
-		}
-	}
+	// 	// check if fugufile
+	// 	exts := fileExtensions(fugufileSearchFiles)
+	// 	for _, f := range args1 {
+	// 		if isFuguFile(f, exts) {
+	// 			fugufilePath = f
+	// 			fugufilePathGiven = true
+	// 			break
+	// 		}
+	// 	}
 
-	// get all labels
-	labels, err := file.GetLabels(fugufilePath)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	// 	if fugufilePath == "" {
+	// 		for _, f := range fugufileSearchFiles {
+	// 			if fileExists(f) {
+	// 				fugufilePath = f
+	// 				break
+	// 			}
+	// 		}
+	// 		if fugufilePath == "" {
+	// 			fmt.Printf("%s not found\n", fugufileSearchFiles[0])
+	// 			os.Exit(1)
+	// 		}
 
-	// check if label
-	// dont worry here, if no label is found
-	for _, l := range args1 {
-		if isLabel(l, labels) {
-			label = l
-			labelGiven = true
-			break
-		}
-	}
+	// 	} else {
+	// 		if !fileExists(fugufilePath) {
+	// 			fmt.Printf("%s not found\n", fugufilePath)
+	// 			os.Exit(1)
+	// 		}
+	// 	}
 
-	// load fugu config
-	fuguConfig, err := file.GetConfig(fugufilePath, label)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	// 	// get all labels
+	// 	labels, err := file.GetLabels(fugufilePath)
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		os.Exit(1)
+	// 	}
 
-	// now do docker option parsing
-	offsetCount := 2
-	if fugufilePathGiven {
-		offsetCount += 1
-	}
-	if labelGiven {
-		offsetCount += 1
-	}
+	// 	// check if label
+	// 	// dont worry here, if no label is found
+	// 	for _, l := range args1 {
+	// 		if isLabel(l, labels) {
+	// 			label = l
+	// 			labelGiven = true
+	// 			break
+	// 		}
+	// 	}
 
-	remainingArgs := []string{}
-	options := make(map[string]interface{})
-	rf := &mflag.FlagSet{}
-	if argsLen >= offsetCount {
-		options, rf, err = run.Parse(args[offsetCount:])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(2)
-		}
-		remainingArgs = rf.Args()
-	}
+	// 	// load fugu config
+	// 	fuguConfig, err := file.GetConfig(fugufilePath, label)
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		os.Exit(1)
+	// 	}
 
-	// merge config from fugufile
-	for k, v := range options {
-		switch v.(type) {
-		case []string:
-			if len(v.([]string)) > 0 {
-				fuguConfig[k] = v
-			}
+	// 	// now do docker option parsing
+	// 	offsetCount := 2
+	// 	if fugufilePathGiven {
+	// 		offsetCount += 1
+	// 	}
+	// 	if labelGiven {
+	// 		offsetCount += 1
+	// 	}
 
-		case string:
-			if v.(string) != "" {
-				fuguConfig[k] = v
-			}
+	// 	remainingArgs := []string{}
+	// 	options := make(map[string]interface{})
+	// 	rf := &mflag.FlagSet{}
+	// 	if argsLen >= offsetCount {
+	// 		options, rf, err = run.Parse(args[offsetCount:])
+	// 		if err != nil {
+	// 			fmt.Println(err)
+	// 			os.Exit(2)
+	// 		}
+	// 		remainingArgs = rf.Args()
+	// 	}
 
-		default:
-			fuguConfig[k] = v
-		}
-	}
+	// 	// merge config from fugufile
+	// 	for k, v := range options {
+	// 		switch v.(type) {
+	// 		case []string:
+	// 			if len(v.([]string)) > 0 {
+	// 				fuguConfig[k] = v
+	// 			}
 
-	if len(remainingArgs) > 0 {
-		fuguConfig["command"] = remainingArgs[0]
-	}
+	// 		case string:
+	// 			if v.(string) != "" {
+	// 				fuguConfig[k] = v
+	// 			}
 
-	if len(remainingArgs) > 1 {
-		fuguConfig["args"] = remainingArgs[1:]
-	}
+	// 		default:
+	// 			fuguConfig[k] = v
+	// 		}
+	// 	}
 
-	switch command {
-	case "run":
+	// 	if len(remainingArgs) > 0 {
+	// 		fuguConfig["command"] = remainingArgs[0]
+	// 	}
 
-		execArgs := []string{"run"}
+	// 	if len(remainingArgs) > 1 {
+	// 		fuguConfig["args"] = remainingArgs[1:]
+	// 	}
 
-		// make interactive tty when command given
-		if _, ok := fuguConfig["command"]; ok {
-			fuguConfig["interactive"] = true
-			fuguConfig["tty"] = true
-		}
+	// 	switch command {
+	// 	case "run":
 
-		for k, v := range fuguConfig {
+	// 		execArgs := []string{"run"}
 
-			if k != "image" && k != "args" && k != "command" {
-				switch v.(type) {
-				default:
-					execArgs = append(execArgs, fmt.Sprintf(`--%s="%v"`, k, v))
+	// 		// make interactive tty when command given
+	// 		if _, ok := fuguConfig["command"]; ok {
+	// 			fuguConfig["interactive"] = true
+	// 			fuguConfig["tty"] = true
+	// 		}
 
-				case []string:
-					for _, v2 := range v.([]string) {
-						execArgs = append(execArgs, fmt.Sprintf(`--%s="%v"`, k, v2))
-					}
+	// 		for k, v := range fuguConfig {
 
-				case bool:
-					execArgs = append(execArgs, fmt.Sprintf(`--%s=%v`, k, v.(bool)))
-				}
-			}
-		}
+	// 			if k != "image" && k != "args" && k != "command" {
+	// 				switch v.(type) {
+	// 				default:
+	// 					execArgs = append(execArgs, fmt.Sprintf(`--%s="%v"`, k, v))
 
-		// execArgs = append([]string{dockerImage}, execArgs...)
-		execArgs = append(execArgs, fuguConfig["image"].(string))
+	// 				case []string:
+	// 					for _, v2 := range v.([]string) {
+	// 						execArgs = append(execArgs, fmt.Sprintf(`--%s="%v"`, k, v2))
+	// 					}
 
-		if _, ok := fuguConfig["command"]; ok {
-			execArgs = append(execArgs, fuguConfig["command"].(string))
-		}
+	// 				case bool:
+	// 					execArgs = append(execArgs, fmt.Sprintf(`--%s=%v`, k, v.(bool)))
+	// 				}
+	// 			}
+	// 		}
 
-		if _, ok := fuguConfig["args"]; ok {
-			switch fuguConfig["args"].(type) {
-			case []string:
-				execArgs = append(execArgs, fuguConfig["args"].([]string)...)
+	// 		// execArgs = append([]string{dockerImage}, execArgs...)
+	// 		execArgs = append(execArgs, fuguConfig["image"].(string))
 
-			case []interface{}:
-				for _, v := range fuguConfig["args"].([]interface{}) {
-					switch v.(type) {
-					case string:
-						execArgs = append(execArgs, v.(string))
+	// 		if _, ok := fuguConfig["command"]; ok {
+	// 			execArgs = append(execArgs, fuguConfig["command"].(string))
+	// 		}
 
-					default:
-						panic(fmt.Sprintf("unknown type %#v", v))
-					}
-				}
+	// 		if _, ok := fuguConfig["args"]; ok {
+	// 			switch fuguConfig["args"].(type) {
+	// 			case []string:
+	// 				execArgs = append(execArgs, fuguConfig["args"].([]string)...)
 
-			case string:
-				execArgs = append(execArgs, fuguConfig["args"].(string))
+	// 			case []interface{}:
+	// 				for _, v := range fuguConfig["args"].([]interface{}) {
+	// 					switch v.(type) {
+	// 					case string:
+	// 						execArgs = append(execArgs, v.(string))
 
-			default:
-				panic(fmt.Sprintf("unknown type %#v", fuguConfig["args"]))
-			}
-		}
+	// 					default:
+	// 						panic(fmt.Sprintf("unknown type %#v", v))
+	// 					}
+	// 				}
 
-		fmt.Printf("docker run %s\n\n", execArgs)
+	// 			case string:
+	// 				execArgs = append(execArgs, fuguConfig["args"].(string))
 
-		cmd := exec.Command("docker", execArgs...)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		cmd.Run()
+	// 			default:
+	// 				panic(fmt.Sprintf("unknown type %#v", fuguConfig["args"]))
+	// 			}
+	// 		}
 
-	case "build":
-		fmt.Println("@todo")
-		// os.Exit(2)
-	default:
-		// os.Exit(1)
-	}
+	// 		fmt.Printf("docker run %s\n\n", execArgs)
+
+	// 		cmd := exec.Command("docker", execArgs...)
+	// 		cmd.Stdout = os.Stdout
+	// 		cmd.Stderr = os.Stderr
+	// 		cmd.Stdin = os.Stdin
+	// 		cmd.Run()
+
+	// 	case "build":
+	// 		fmt.Println("@todo")
+	// 		// os.Exit(2)
+	// 	default:
+	// 		// os.Exit(1)
+	// 	}
 }
 
 func isFuguFile(file string, extensions []string) bool {
