@@ -1,10 +1,12 @@
 package main
 
 import (
+	// "bufio"
 	"fmt"
 	"github.com/docker/docker/pkg/mflag"
 	"github.com/mattes/fugu/file"
 	"github.com/mattes/fugu/run"
+	_ "io"
 	"os"
 	"os/exec"
 	"path"
@@ -135,24 +137,19 @@ func main() {
 		}
 	}
 
-	dockerCommand := ""
 	if len(remainingArgs) > 0 {
-		dockerCommand = remainingArgs[0]
+		fuguConfig["command"] = remainingArgs[0]
 	}
-	_ = dockerCommand
 
-	dockerArgs := make([]string, 0)
 	if len(remainingArgs) > 1 {
-		dockerArgs = remainingArgs[1:]
+		fuguConfig["args"] = remainingArgs[1:]
 	}
-	_ = dockerArgs
 
 	switch command {
 	case "run":
 
 		execArgs := []string{"run"}
 
-		dockerImage := ""
 		for k, v := range fuguConfig {
 
 			if k != "image" && k != "args" && k != "command" {
@@ -168,37 +165,84 @@ func main() {
 				case bool:
 					execArgs = append(execArgs, fmt.Sprintf(`--%s=%v`, k, v.(bool)))
 				}
-
-			}
-
-			if k == "image" {
-				dockerImage = v.(string)
-			}
-			if k == "args" {
-				// dockerArgs = v.([]string)
-			}
-			if k == "command" {
-				dockerCommand = v.(string)
 			}
 		}
 
 		// execArgs = append([]string{dockerImage}, execArgs...)
-		execArgs = append(execArgs, dockerImage)
-		execArgs = append(execArgs, dockerCommand)
-		execArgs = append(execArgs, dockerArgs...)
+		execArgs = append(execArgs, fuguConfig["image"].(string))
 
-		fmt.Println("execArgs", execArgs)
+		if _, ok := fuguConfig["command"]; ok {
+			execArgs = append(execArgs, fuguConfig["command"].(string))
+		}
+
+		if _, ok := fuguConfig["args"]; ok {
+			switch fuguConfig["args"].(type) {
+			case []string:
+				execArgs = append(execArgs, fuguConfig["args"].([]string)...)
+
+			case []interface{}:
+				for _, v := range fuguConfig["args"].([]interface{}) {
+					switch v.(type) {
+					case string:
+						execArgs = append(execArgs, v.(string))
+
+					default:
+						panic(fmt.Sprintf("unknown type %#v", v))
+					}
+				}
+
+			case string:
+				execArgs = append(execArgs, fuguConfig["args"].(string))
+
+			default:
+				panic(fmt.Sprintf("unknown type %#v", fuguConfig["args"]))
+			}
+		}
+
+		fmt.Printf("docker run %s\n\n", execArgs)
 
 		cmd := exec.Command("docker", execArgs...)
+
+		// // in, _ := cmd.StdinPipe()
+		// // out, _ := cmd.StdoutPipe()
+		// // err, _ := cmd.StderrPipe()
+
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+
+		// //read := bufio.NewReader(os.Stdin)
+		// //cmd.Stdin = read
+
 		cmd.Run()
+
+		// cmd.Wait()
+
+		// go io.Copy(os.Stdout, out)
+		// io.Copy(writer, os.Stdin)
+		// // writer.WriteString("echo hello")
+		// cmd.Wait()
+
+		// cwd, _ := os.Getwd()
+
+		// pa := os.ProcAttr{
+		// 	Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
+		// 	Dir:   cwd,
+		// }
+
+		// proc, err := os.StartProcess("/usr/bin/env", []string{"gelo"}, &pa)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	os.Exit(3)
+		// }
+
+		// proc.Wait()
 
 	case "build":
 		fmt.Println("@todo")
-		os.Exit(2)
+		// os.Exit(2)
 	default:
-		os.Exit(1)
+		// os.Exit(1)
 	}
 }
 
