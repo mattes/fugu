@@ -150,6 +150,12 @@ func main() {
 
 		execArgs := []string{"run"}
 
+		// make interactive tty when command given
+		if _, ok := fuguConfig["command"]; ok {
+			fuguConfig["interactive"] = true
+			fuguConfig["tty"] = true
+		}
+
 		for k, v := range fuguConfig {
 
 			if k != "image" && k != "args" && k != "command" {
