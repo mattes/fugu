@@ -1,9 +1,12 @@
 package main
 
 import (
-	_ "flag"
+	"flag"
 	"fmt"
+	_ "github.com/docker/docker/pkg/mflag"
+	"github.com/docker/docker/runconfig"
 	"github.com/mattes/fugu/file"
+	"io/ioutil"
 	"os"
 	"path"
 	_ "strings"
@@ -42,6 +45,7 @@ func main() {
 	label := ""
 	labelGiven := false
 
+	// extract fugufile and label if given
 	args1 := make([]string, 0)
 	if argsLen >= 4 {
 		args1 = args[2:4]
@@ -113,21 +117,50 @@ func main() {
 		offsetCount += 1
 	}
 
-	dockerArgs := []string{} // []string{strings.TrimSpace(fuguConfig["image"].(string))}
+	// []string{strings.TrimSpace(fuguConfig["image"].(string))}
+
+	remainingArgs := []string{}
 	if argsLen >= offsetCount {
-		dockerArgs = append(dockerArgs, args[offsetCount:]...)
+		dockerArgs := args[offsetCount:]
+
+		// parse --image
+		cflag := flag.NewFlagSet("", flag.ContinueOnError)
+		cflag.SetOutput(ioutil.Discard)
+		dockerImage := cflag.String("image", "", "")
+		fmt.Println("dockerImage", *dockerImage)
+		fmt.Println("dockerArgs", dockerArgs)
+
+		if err := cflag.Parse(dockerArgs); err != nil {
+			// fmt.Println(err)
+		}
+
+		foob := cflag.Lookup("image")
+		fmt.Println("lookup", foob.Value)
+
+		// parse official docker options
+		fmt.Println("cflag.Args()", cflag.Args())
+		config, _, dflag, err := runconfig.Parse(cflag.Args(), nil)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		remainingArgs = dflag.Args()
+
+		// merge config from fugufile
+		_ = config
 	}
 
-	fmt.Println(dockerArgs)
+	fmt.Println("remainingArgs", remainingArgs)
 
-	switch command {
-	case "run":
+	_ = command
+	// switch command {
+	// case "run":
 
-	case "build":
+	// case "build":
 
-	default:
-		os.Exit(1)
-	}
+	// default:
+	// 	os.Exit(1)
+	// }
 }
 
 func isFuguFile(file string, extensions []string) bool {
@@ -166,4 +199,25 @@ func fileExtensions(s []string) []string {
 		}
 	}
 	return su
+}
+
+func parseFlags(in []string) (out []string) {
+
+	f := flag.NewFlagSet("hello", flag.ContinueOnError)
+
+	f.String("flag2", "", "")
+	f.Bool("b2", false, "")
+
+	fmt.Println(in)
+
+	f.Parse(in)
+
+	f.VisitAll(func(fl *flag.Flag) {
+		fmt.Println(fl.Name, fl.Value)
+	})
+
+	// booleanFlags := []string{"d", "detach", "i", "interactive", "P", "publish-all", "privileged", "rm", "sig-proxy", "t", "tty"}
+	// valueFlags := []string{"a", "attach", "c", "cpu-shares", "cap-add", "cap-drop", "cidfile", "cpuset", "device", "dns", "dns-search", "e", "env", "entrypoint", "env-file", "expose", "h", "hostname", "link", "lxc-conf", "m", "memory", "name", "net", "p", "publish", "restart", "u", "user", "v", "volume", "volumes-from", "w", "workdir"}
+
+	return
 }
