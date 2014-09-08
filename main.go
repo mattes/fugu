@@ -1,28 +1,17 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	_ "github.com/docker/docker/pkg/mflag"
-	_ "github.com/docker/docker/runconfig"
+	"github.com/docker/docker/pkg/mflag"
 	"github.com/mattes/fugu/file"
 	"github.com/mattes/fugu/run"
-
 	"os"
+	"os/exec"
 	"path"
 	_ "strings"
 )
 
 var fileNamePaths = []string{"fugu.yml", "fugu.yaml", ".fugu.yml", ".fugu.yaml"}
-
-// fugu run fugu.yml
-// fugu run fugu.yml label
-// fugu run fugu.yml label --rm
-// fugu run label
-// fugu run --rm
-// fugu run label --rm
-
-// fugu run echo "hello world!"
 
 // fugu run [fugu.yml-path] [label] [docker-run-options + --image] [command] [args]
 // fugu build [fugu.yml-path] [label] [docker-build-options] [path=pwd|url|-]
@@ -107,8 +96,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	_ = fuguConfig
-
 	// now do docker option parsing
 	offsetCount := 2
 	if fugufilePathGiven {
@@ -118,36 +105,92 @@ func main() {
 		offsetCount += 1
 	}
 
-	// []string{strings.TrimSpace(fuguConfig["image"].(string))}
-
 	remainingArgs := []string{}
+	options := make(map[string]interface{})
+	rf := &mflag.FlagSet{}
 	if argsLen >= offsetCount {
-		dockerArgs := args[offsetCount:]
-
-		config, rf, err := run.Parse(dockerArgs)
+		options, rf, err = run.Parse(args[offsetCount:])
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(2)
 		}
-
-		fmt.Println(config["publish"])
 		remainingArgs = rf.Args()
-
-		// merge config from fugufile
-
 	}
 
-	fmt.Println("remainingArgs", remainingArgs)
+	// merge config from fugufile
+	for k, v := range options {
+		fuguConfig[k] = v
+	}
 
-	_ = command
-	// switch command {
-	// case "run":
+	dockerCommand := ""
+	if len(remainingArgs) > 0 {
+		dockerCommand = remainingArgs[0]
+	}
+	_ = dockerCommand
 
-	// case "build":
+	dockerArgs := make([]string, 0)
+	if len(remainingArgs) > 1 {
+		dockerArgs = remainingArgs[1:]
+	}
+	_ = dockerArgs
 
-	// default:
-	// 	os.Exit(1)
-	// }
+	switch command {
+	case "run":
+		// fmt.Println(len(dockerArgs))
+		// fmt.Printf("%#v\n", fuguConfig)
+
+		// map[image:a-team/action detach:false command:echo args:[I love it when a plan comes together.] rm:false publish:[50:50 4:4]]
+
+		execArgs := []string{"run"}
+
+		dockerImage := ""
+		for k, v := range fuguConfig {
+
+			if k != "image" && k != "args" && k != "command" {
+				switch v.(type) {
+				default:
+					execArgs = append(execArgs, fmt.Sprintf(`--%s="%v"`, k, v))
+
+				case []string:
+					for _, v2 := range v.([]string) {
+						execArgs = append(execArgs, fmt.Sprintf(`--%s="%v"`, k, v2))
+					}
+
+				case bool:
+					execArgs = append(execArgs, fmt.Sprintf(`--%s=%v`, k, v.(bool)))
+				}
+
+			}
+
+			if k == "image" {
+				dockerImage = v.(string)
+			}
+			if k == "args" {
+				// dockerArgs = v.([]string)
+			}
+			if k == "command" {
+				dockerCommand = v.(string)
+			}
+		}
+
+		// execArgs = append([]string{dockerImage}, execArgs...)
+		execArgs = append(execArgs, dockerImage)
+		execArgs = append(execArgs, dockerCommand)
+		execArgs = append(execArgs, dockerArgs...)
+
+		fmt.Println("execArgs", execArgs)
+
+		cmd := exec.Command("docker", execArgs...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Run()
+
+	case "build":
+		fmt.Println("@todo")
+		os.Exit(2)
+	default:
+		os.Exit(1)
+	}
 }
 
 func isFuguFile(file string, extensions []string) bool {
