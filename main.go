@@ -202,41 +202,10 @@ func main() {
 		fmt.Printf("docker run %s\n\n", execArgs)
 
 		cmd := exec.Command("docker", execArgs...)
-
-		// // in, _ := cmd.StdinPipe()
-		// // out, _ := cmd.StdoutPipe()
-		// // err, _ := cmd.StderrPipe()
-
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
-
-		// //read := bufio.NewReader(os.Stdin)
-		// //cmd.Stdin = read
-
 		cmd.Run()
-
-		// cmd.Wait()
-
-		// go io.Copy(os.Stdout, out)
-		// io.Copy(writer, os.Stdin)
-		// // writer.WriteString("echo hello")
-		// cmd.Wait()
-
-		// cwd, _ := os.Getwd()
-
-		// pa := os.ProcAttr{
-		// 	Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
-		// 	Dir:   cwd,
-		// }
-
-		// proc, err := os.StartProcess("/usr/bin/env", []string{"gelo"}, &pa)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	os.Exit(3)
-		// }
-
-		// proc.Wait()
 
 	case "build":
 		fmt.Println("@todo")
