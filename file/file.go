@@ -2,131 +2,123 @@ package file
 
 import (
 	"errors"
-	"fmt"
+	"github.com/mattes/fugu/config"
 	"github.com/mattes/yaml"
 	"io/ioutil"
 )
 
-type FuguFile struct {
-	Path     string
-	FileName string
-	Data     map[yaml.StringIndex]interface{}
+var (
+	invalidYamlError = errors.New("Invalid YAML format. Did you set an `image` variable?")
+)
+
+type Label struct {
+	Name   string
+	Config map[string]interface{}
 }
 
-func Parse(data []byte) (*FuguFile, error) {
-	f := &FuguFile{}
-	if err := yaml.Unmarshal(data, &f.Data); err != nil {
-		return &FuguFile{}, err
+func LoadFile(filepath, label string, conf *[]config.Value) (allLabelNames []string, err error) {
+	data, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+	return Load(data, label, conf)
+}
+
+func Load(data []byte, label string, conf *[]config.Value) (allLabelNames []string, err error) {
+	if label == "" {
+		label = "default"
 	}
 
-	if len(f.Data) == 0 {
-		return &FuguFile{}, errors.New("Empy configuration given.")
+	labels, err := parse(data)
+	if err != nil {
+		return nil, err
 	}
 
-	// are labels used?
-	imageFoundInLevel1 := false
-	newFlatData := make(map[interface{}]interface{}) // as per yaml pkg default
-	for k, v := range f.Data {
-		newFlatData[k.Value] = v
-		if k.Value == "image" {
-			// found image variable in level 1, thus no labels are used
-			imageFoundInLevel1 = true
+	if len(labels) > 0 {
+
+		// TODO(mattes): this is buggy, because we cannot garantuee the sort order
+		// see https://github.com/go-yaml/yaml/issues/30
+
+		useLabel := labels[0]
+		for _, l := range labels {
+			allLabelNames = append(allLabelNames, l.Name)
+			if label == l.Name {
+				useLabel = l
+			}
 		}
-	}
-	if imageFoundInLevel1 {
-		// set default label, because no labels are used
-		f.Data = map[yaml.StringIndex]interface{}{yaml.StringIndex{Index: 0, Value: "default"}: newFlatData}
-	}
 
-	if !imageFoundInLevel1 {
-		// make sure all labels have a image variable
-		for k, v := range f.Data {
-			switch v.(type) {
-
-			case string:
-				return &FuguFile{}, errors.New(fmt.Sprintf("Missing 'image' variable for label %s.", k.Value))
-
-			case map[interface{}]interface{}:
-				imageFoundInLevel2 := false
-				for k2, _ := range v.(map[interface{}]interface{}) {
-					if k2.(string) == "image" {
-						imageFoundInLevel2 = true
-						break
+		// populate Label.Config into config.Value
+		for _, c := range *conf {
+			for _, name := range c.Names() {
+				for name2, val := range useLabel.Config {
+					if name == name2 {
+						c.Set(val)
 					}
 				}
-				if !imageFoundInLevel2 {
-					return &FuguFile{}, errors.New(fmt.Sprintf("Missing 'image' variable for label %s.", k.Value))
-				}
-
-			default:
-				return &FuguFile{}, errors.New(fmt.Sprintf("Unable to parse configuration for label %s.", k.Value))
 			}
 		}
-	}
+		return allLabelNames, nil
 
-	return f, nil
-}
-
-func GetLabels(filepath string) ([]string, error) {
-	// TODO(mattes) refactor
-	content, err := ioutil.ReadFile(filepath)
-	if err != nil {
-		return nil, err
-	}
-	fugufile, err := Parse(content)
-	if err != nil {
-		return nil, err
-	}
-
-	labels := make([]string, 0)
-	for k, _ := range fugufile.Data {
-		labels = append(labels, k.Value)
-	}
-	return labels, nil
-}
-
-func GetConfig(filepath, label string) (config map[string]interface{}, err error) {
-	// TODO(mattes) refactor
-	content, err := ioutil.ReadFile(filepath)
-	if err != nil {
-		return nil, err
-	}
-	fugufile, err := Parse(content)
-	if err != nil {
-		return nil, err
-	}
-
-	var foundConfig map[interface{}]interface{}
-	if label == "" {
-		// get first label from fugufile
-		for k, v := range fugufile.Data {
-			if k.Index == 0 {
-				foundConfig = v.(map[interface{}]interface{})
-				break
-			}
-		}
 	} else {
-		// get the actual label
-		for k, v := range fugufile.Data {
-			if k.Value == label {
-				foundConfig = v.(map[interface{}]interface{})
-				break
+		return nil, nil
+	}
+}
+
+func parse(data []byte) ([]Label, error) {
+	config := make([]Label, 0)
+
+	// test if labels are used
+	var labels bool
+	preConfig := make(map[string]interface{})
+	if err := yaml.Unmarshal(data, &preConfig); err != nil {
+		return config, err
+	}
+
+	if len(preConfig) == 0 {
+		return config, invalidYamlError
+	}
+
+	if _, ok := preConfig["image"]; ok {
+		labels = false
+	} else {
+		labels = true
+	}
+
+	// align config depending on labels
+	if !labels {
+		// when no labels are used, prepend `default` label
+		config = append(config, Label{
+			Name:   "default",
+			Config: preConfig, // is map[string]interface{}
+		})
+	} else {
+		// labels are used, convert some types
+
+		// TODO(mattes): see comment from above
+		// preConfig should reflect the order from the yaml file itself
+
+		for label, v := range preConfig {
+			vNew := make(map[string]interface{})
+			switch v.(type) {
+			case map[interface{}]interface{}:
+				imageFound := false
+				for k2, v2 := range v.(map[interface{}]interface{}) {
+					vNew[k2.(string)] = v2
+					if k2.(string) == "image" {
+						imageFound = true
+					}
+				}
+				if !imageFound {
+					return config, invalidYamlError
+				}
+			default:
+				return config, invalidYamlError
 			}
+			config = append(config, Label{
+				Name:   label,
+				Config: vNew, // is map[string]interface{}
+			})
 		}
-	}
-
-	if foundConfig == nil {
-		if label == "" {
-			return nil, errors.New("No configuration found.")
-		} else {
-			return nil, errors.New(fmt.Sprintf("No configuration found for label %s.", label))
-		}
-	}
-
-	// map[interface{}]interface{} -> map[string]interface{}
-	config = make(map[string]interface{})
-	for k, v := range foundConfig {
-		config[k.(string)] = v
 	}
 
 	return config, nil

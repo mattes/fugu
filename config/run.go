@@ -1,0 +1,43 @@
+package config
+
+var RunConfig = []Value{
+	&StringValue{Name: []string{"image"}},
+	&StringValue{Name: []string{"command"}},
+	&StringSliceValue{Name: []string{"args"}},
+
+	&BoolValue{Name: []string{"rm"}},
+	&BoolValue{Name: []string{"detach", "d"}},
+	&BoolValue{Name: []string{"networking", "n"}},
+	&BoolValue{Name: []string{"privileged"}},
+	&BoolValue{Name: []string{"publish-all", "P"}},
+	&BoolValue{Name: []string{"interactive", "i"}},
+	&BoolValue{Name: []string{"tty", "t"}},
+
+	&StringValue{Name: []string{"cidfile"}},
+	&StringValue{Name: []string{"entrypoint"}},
+	&StringValue{Name: []string{"hostname", "h"}},
+	&StringValue{Name: []string{"memory", "m"}},
+	&StringValue{Name: []string{"user", "u"}},
+	&StringValue{Name: []string{"workdir", "w"}},
+	&Int64Value{Name: []string{"cpu-shares", "c"}},
+	&StringValue{Name: []string{"cpuset"}},
+	&StringValue{Name: []string{"net"}},
+	&StringValue{Name: []string{"restart"}},
+	&StringValue{Name: []string{"name"}},
+	&BoolValue{Name: []string{"sig-proxy"}},
+
+	&StringSliceValue{Name: []string{"attach", "a"}},
+	&StringSliceValue{Name: []string{"volume", "v"}},
+	&StringSliceValue{Name: []string{"link"}},
+	&StringSliceValue{Name: []string{"device"}},
+	&StringSliceValue{Name: []string{"env", "e"}},
+	&StringSliceValue{Name: []string{"env-file"}},
+	&StringSliceValue{Name: []string{"publish", "p"}},
+	&StringSliceValue{Name: []string{"expose"}},
+	&StringSliceValue{Name: []string{"dns"}},
+	&StringSliceValue{Name: []string{"dns-search"}},
+	&StringSliceValue{Name: []string{"volumes-from"}},
+	&StringSliceValue{Name: []string{"lxc-conf"}},
+	&StringSliceValue{Name: []string{"cap-add"}},
+	&StringSliceValue{Name: []string{"cap-drop"}},
+}

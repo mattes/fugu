@@ -1,5 +1,5 @@
 a-team: &a-team
-  image: mattes/hello-world-nginx
+  image: a-team/action
   detach: true
 
 hannibal:

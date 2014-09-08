@@ -1,17 +1,17 @@
 package file
 
 import (
-	"fmt"
-	"github.com/mattes/yaml"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/mattes/fugu/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 var parseTests = []struct {
-	data     []byte
-	fuguFile *FuguFile
-	err      bool
+	in  []byte
+	out []Label
+	err bool
 }{
 
 	// test if default label is set if none is present
@@ -20,8 +20,14 @@ var parseTests = []struct {
 name: test
 image: mattes/foobar
 `),
-		&FuguFile{
-			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"default", 0}: map[interface{}]interface{}{"name": "test", "image": "mattes/foobar"}},
+		[]Label{
+			Label{
+				Name: "default",
+				Config: map[string]interface{}{
+					"name":  "test",
+					"image": "mattes/foobar",
+				},
+			},
 		},
 		false,
 	},
@@ -33,8 +39,14 @@ default:
   name: test
   image: mattes/foobar
 `),
-		&FuguFile{
-			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"default", 0}: map[interface{}]interface{}{"name": "test", "image": "mattes/foobar"}},
+		[]Label{
+			Label{
+				Name: "default",
+				Config: map[string]interface{}{
+					"name":  "test",
+					"image": "mattes/foobar",
+				},
+			},
 		},
 		false,
 	},
@@ -48,8 +60,15 @@ default:
   publish:
     - 8080:80
 `),
-		&FuguFile{
-			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"default", 0}: map[interface{}]interface{}{"name": "test", "image": "mattes/foobar", "publish": []interface{}{"8080:80"}}},
+		[]Label{
+			Label{
+				Name: "default",
+				Config: map[string]interface{}{
+					"name":    "test",
+					"image":   "mattes/foobar",
+					"publish": []interface{}{"8080:80"},
+				},
+			},
 		},
 		false,
 	},
@@ -65,8 +84,21 @@ bar:
   <<: *foo
   image: mattes/foobar2
 `),
-		&FuguFile{
-			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"foo", 0}: map[interface{}]interface{}{"name": "test", "image": "mattes/foobar"}, yaml.StringIndex{"bar", 1}: map[interface{}]interface{}{"name": "test", "image": "mattes/foobar2"}},
+		[]Label{
+			Label{
+				Name: "foo",
+				Config: map[string]interface{}{
+					"name":  "test",
+					"image": "mattes/foobar",
+				},
+			},
+			Label{
+				Name: "bar",
+				Config: map[string]interface{}{
+					"name":  "test",
+					"image": "mattes/foobar2",
+				},
+			},
 		},
 		false,
 	},
@@ -76,7 +108,7 @@ bar:
 		[]byte(`
 name: test
 `),
-		&FuguFile{},
+		[]Label{},
 		true,
 	},
 
@@ -85,8 +117,13 @@ name: test
 		[]byte(`
 image: test
 `),
-		&FuguFile{
-			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"default", 0}: map[interface{}]interface{}{"image": "test"}},
+		[]Label{
+			Label{
+				Name: "default",
+				Config: map[string]interface{}{
+					"image": "test",
+				},
+			},
 		},
 		false,
 	},
@@ -97,18 +134,23 @@ image: test
 default:
   name: test
 `),
-		&FuguFile{},
+		[]Label{},
 		true,
 	},
 
-	// test image only when using labels
+	// test when only image variable is given in label
 	{
 		[]byte(`
 label1:
   image: test
 `),
-		&FuguFile{
-			Data: map[yaml.StringIndex]interface{}{yaml.StringIndex{"label1", 0}: map[interface{}]interface{}{"image": "test"}},
+		[]Label{
+			Label{
+				Name: "label1",
+				Config: map[string]interface{}{
+					"image": "test",
+				},
+			},
 		},
 		false,
 	},
@@ -116,82 +158,148 @@ label1:
 	// test empy
 	{
 		[]byte(""),
-		&FuguFile{},
+		[]Label{},
 		true,
 	},
 
-	// test bullshit
+	// test non-sense
 	{
 		[]byte(`label1:`),
-		&FuguFile{},
+		[]Label{},
 		true,
 	},
 	{
 		[]byte(`default`),
-		&FuguFile{},
+		[]Label{},
 		true,
 	},
 	{
 		[]byte(`default:`),
-		&FuguFile{},
+		[]Label{},
 		true,
 	},
 	{
 		[]byte(`
-default:
-  - hmm
-`),
-		&FuguFile{},
+	default:
+	  - hmm
+	`),
+		[]Label{},
 		true,
 	},
 }
 
 func TestParse(t *testing.T) {
 	for _, tt := range parseTests {
-		fuguFile, err := Parse(tt.data)
+		labels, err := parse(tt.in)
 		if !tt.err {
-			require.NoError(t, err, fmt.Sprintf("%s", tt))
+			require.NoError(t, err, spew.Sdump(tt))
 		} else if tt.err {
-			require.Error(t, err, fmt.Sprintf("%s", tt))
+			require.Error(t, err, spew.Sdump(tt))
 		}
-		assert.Equal(t, tt.fuguFile.Data, fuguFile.Data)
+		assert.Equal(t, tt.out, labels)
 	}
 }
 
-var getConfigTests = []struct {
-	filepath string
-	label    string
-	config   map[string]interface{}
-	err      bool
+var labelData1 = []byte(`
+label:
+  name: test
+  image: mattes/foobar
+  publish:
+    - 8080:80
+
+another-label:
+  name: halligalli
+  image: mattes/foobar2
+  publish:
+    - 55:66
+`)
+
+var loadTests = []struct {
+	in            []byte
+	label         string
+	allLabelNames []string
+	out           []config.Value
+	err           bool
 }{
 	{
-		"../fugu.example.yml",
-		"",
-		map[string]interface{}{"image": "a-team/action", "detach": true},
+		[]byte(`
+default:
+  name: test
+  image: mattes/foobar
+  publish:
+    - 8080:80
+`),
+		"default",
+		[]string{"default"},
+		[]config.Value{
+			&config.StringValue{Name: []string{"name"}, Value: "test", Present: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Present: true},
+			&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"8080:80"}, Present: true},
+			&config.StringValue{Name: []string{"non-exist"}, Present: false},
+		},
 		false,
 	},
+
 	{
-		"../fugu.example.yml",
-		"a-team",
-		map[string]interface{}{"image": "a-team/action", "detach": true},
+		labelData1,
+		"label",
+		[]string{"label", "another-label"},
+		[]config.Value{
+			&config.StringValue{Name: []string{"name"}, Value: "test", Present: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Present: true},
+			&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"8080:80"}, Present: true},
+			&config.StringValue{Name: []string{"non-exist"}, Present: false},
+		},
 		false,
 	},
+
 	{
-		"../fugu.example.yml",
-		"hannibal",
-		map[string]interface{}{"image": "a-team/action", "detach": false, "command": "echo", "args": []interface{}{"I love it when a plan comes together."}, "rm": true},
+		labelData1,
+		"another-label",
+		[]string{"label", "another-label"},
+		[]config.Value{
+			&config.StringValue{Name: []string{"name"}, Value: "halligalli", Present: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar2", Present: true},
+			&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"55:66"}, Present: true},
+			&config.StringValue{Name: []string{"non-exist"}, Present: false},
+		},
 		false,
 	},
+
+	// test if first label is fetched
+	// TODO(mattes): this is buggy, because we cannot garantuee the sort order
+	// see comments in file.go
+	// {
+	// 	labelData1,
+	// 	"",
+	// 	[]string{"label", "another-label"},
+	// 	[]config.Value{
+	// 		&config.StringValue{Name: []string{"name"}, Value: "test", Present: true},
+	// 		&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Present: true},
+	// 		&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"8080:80"}, Present: true},
+	// 		&config.StringValue{Name: []string{"non-exist"}, Present: false},
+	// 	},
+	// 	false,
+	// },
 }
 
-func TestGetConfig(t *testing.T) {
-	for _, tt := range getConfigTests {
-		config, err := GetConfig(tt.filepath, tt.label)
-		if !tt.err {
-			require.NoError(t, err, fmt.Sprintf("%s", tt))
-		} else if tt.err {
-			require.Error(t, err, fmt.Sprintf("%s", tt))
+func TestLoad(t *testing.T) {
+
+	for _, tt := range loadTests {
+		c := []config.Value{
+			&config.StringValue{Name: []string{"name"}},
+			&config.StringValue{Name: []string{"image"}},
+			&config.StringSliceValue{Name: []string{"publish"}},
+			&config.StringValue{Name: []string{"non-exist"}},
 		}
-		assert.Equal(t, tt.config, config)
+
+		allLabelNames, err := Load(tt.in, tt.label, &c)
+		if !tt.err {
+			require.NoError(t, err, spew.Sdump(tt))
+		} else if tt.err {
+			require.Error(t, err, spew.Sdump(tt))
+		}
+		require.Equal(t, tt.out, c, spew.Sdump(tt), spew.Sdump(c))
+		require.Equal(t, tt.allLabelNames, allLabelNames, spew.Sdump(tt))
 	}
 }
