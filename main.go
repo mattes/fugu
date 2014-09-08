@@ -4,9 +4,10 @@ import (
 	"flag"
 	"fmt"
 	_ "github.com/docker/docker/pkg/mflag"
-	"github.com/docker/docker/runconfig"
+	_ "github.com/docker/docker/runconfig"
 	"github.com/mattes/fugu/file"
-	"io/ioutil"
+	"github.com/mattes/fugu/run"
+
 	"os"
 	"path"
 	_ "strings"
@@ -123,31 +124,17 @@ func main() {
 	if argsLen >= offsetCount {
 		dockerArgs := args[offsetCount:]
 
-		// parse --image
-		cflag := flag.NewFlagSet("", flag.ContinueOnError)
-		cflag.SetOutput(ioutil.Discard)
-		dockerImage := cflag.String("image", "", "")
-		fmt.Println("dockerImage", *dockerImage)
-		fmt.Println("dockerArgs", dockerArgs)
-
-		if err := cflag.Parse(dockerArgs); err != nil {
-			// fmt.Println(err)
-		}
-
-		foob := cflag.Lookup("image")
-		fmt.Println("lookup", foob.Value)
-
-		// parse official docker options
-		fmt.Println("cflag.Args()", cflag.Args())
-		config, _, dflag, err := runconfig.Parse(cflag.Args(), nil)
+		config, rf, err := run.Parse(dockerArgs)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(2)
 		}
-		remainingArgs = dflag.Args()
+
+		fmt.Println(config["publish"])
+		remainingArgs = rf.Args()
 
 		// merge config from fugufile
-		_ = config
+
 	}
 
 	fmt.Println("remainingArgs", remainingArgs)
@@ -199,25 +186,4 @@ func fileExtensions(s []string) []string {
 		}
 	}
 	return su
-}
-
-func parseFlags(in []string) (out []string) {
-
-	f := flag.NewFlagSet("hello", flag.ContinueOnError)
-
-	f.String("flag2", "", "")
-	f.Bool("b2", false, "")
-
-	fmt.Println(in)
-
-	f.Parse(in)
-
-	f.VisitAll(func(fl *flag.Flag) {
-		fmt.Println(fl.Name, fl.Value)
-	})
-
-	// booleanFlags := []string{"d", "detach", "i", "interactive", "P", "publish-all", "privileged", "rm", "sig-proxy", "t", "tty"}
-	// valueFlags := []string{"a", "attach", "c", "cpu-shares", "cap-add", "cap-drop", "cidfile", "cpuset", "device", "dns", "dns-search", "e", "env", "entrypoint", "env-file", "expose", "h", "hostname", "link", "lxc-conf", "m", "memory", "name", "net", "p", "publish", "restart", "u", "user", "v", "volume", "volumes-from", "w", "workdir"}
-
-	return
 }
