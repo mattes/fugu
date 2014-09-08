@@ -1,3 +1,4 @@
+// Package file parses YAML files and passes configuration into config.Values
 package file
 
 import (
@@ -8,7 +9,7 @@ import (
 )
 
 var (
-	invalidYamlError = errors.New("Invalid YAML format. Did you set an `image` variable?")
+	ErrInvalidYaml = errors.New("Invalid YAML format. Did you set an `image` variable?")
 )
 
 type Label struct {
@@ -75,7 +76,7 @@ func parse(data []byte) ([]Label, error) {
 	}
 
 	if len(preConfig) == 0 {
-		return config, invalidYamlError
+		return config, ErrInvalidYaml
 	}
 
 	if _, ok := preConfig["image"]; ok {
@@ -109,10 +110,10 @@ func parse(data []byte) ([]Label, error) {
 					}
 				}
 				if !imageFound {
-					return config, invalidYamlError
+					return config, ErrInvalidYaml
 				}
 			default:
-				return config, invalidYamlError
+				return config, ErrInvalidYaml
 			}
 			config = append(config, Label{
 				Name:   label,

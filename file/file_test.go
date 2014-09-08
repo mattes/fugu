@@ -14,7 +14,7 @@ var parseTests = []struct {
 	err bool
 }{
 
-	// test if default label is set if none is present
+	// test if default label is set if none is defined
 	{
 		[]byte(`
 name: test
@@ -232,10 +232,10 @@ default:
 		"default",
 		[]string{"default"},
 		[]config.Value{
-			&config.StringValue{Name: []string{"name"}, Value: "test", Present: true},
-			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Present: true},
-			&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"8080:80"}, Present: true},
-			&config.StringValue{Name: []string{"non-exist"}, Present: false},
+			&config.StringValue{Name: []string{"name"}, Value: "test", Defined: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Defined: true},
+			&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"8080:80"}, Defined: true},
+			&config.StringValue{Name: []string{"non-exist"}, Defined: false},
 		},
 		false,
 	},
@@ -245,10 +245,10 @@ default:
 		"label",
 		[]string{"label", "another-label"},
 		[]config.Value{
-			&config.StringValue{Name: []string{"name"}, Value: "test", Present: true},
-			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Present: true},
-			&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"8080:80"}, Present: true},
-			&config.StringValue{Name: []string{"non-exist"}, Present: false},
+			&config.StringValue{Name: []string{"name"}, Value: "test", Defined: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Defined: true},
+			&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"8080:80"}, Defined: true},
+			&config.StringValue{Name: []string{"non-exist"}, Defined: false},
 		},
 		false,
 	},
@@ -258,10 +258,10 @@ default:
 		"another-label",
 		[]string{"label", "another-label"},
 		[]config.Value{
-			&config.StringValue{Name: []string{"name"}, Value: "halligalli", Present: true},
-			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar2", Present: true},
-			&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"55:66"}, Present: true},
-			&config.StringValue{Name: []string{"non-exist"}, Present: false},
+			&config.StringValue{Name: []string{"name"}, Value: "halligalli", Defined: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar2", Defined: true},
+			&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"55:66"}, Defined: true},
+			&config.StringValue{Name: []string{"non-exist"}, Defined: false},
 		},
 		false,
 	},
@@ -274,10 +274,10 @@ default:
 	// 	"",
 	// 	[]string{"label", "another-label"},
 	// 	[]config.Value{
-	// 		&config.StringValue{Name: []string{"name"}, Value: "test", Present: true},
-	// 		&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Present: true},
-	// 		&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"8080:80"}, Present: true},
-	// 		&config.StringValue{Name: []string{"non-exist"}, Present: false},
+	// 		&config.StringValue{Name: []string{"name"}, Value: "test", Defined: true},
+	// 		&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Defined: true},
+	// 		&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"8080:80"}, Defined: true},
+	// 		&config.StringValue{Name: []string{"non-exist"}, Defined: false},
 	// 	},
 	// 	false,
 	// },
