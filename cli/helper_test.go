@@ -181,9 +181,9 @@ var buildArgsTest = []struct {
 	},
 }
 
-func TestBuildArgs(t *testing.T) {
+func TestBuildRunArgs(t *testing.T) {
 	for _, tt := range buildArgsTest {
-		args := BuildArgs(&tt.in)
+		args := BuildRunArgs(&tt.in)
 		require.Equal(t, tt.out, args, spew.Sdump(tt))
 	}
 }

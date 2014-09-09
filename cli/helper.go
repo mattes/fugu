@@ -9,7 +9,7 @@ import (
 )
 
 func MergeConfig(fugufileData []byte, args []string, label string, conf *[]config.Value) error {
-	// first: get fugufile
+	// first: parse fugufile
 	_, err := file.Load(fugufileData, label, conf)
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func MergeConfig(fugufileData []byte, args []string, label string, conf *[]confi
 	return nil
 }
 
-func BuildArgs(conf *[]config.Value) []string {
+func BuildRunArgs(conf *[]config.Value) []string {
 	dockerImage := ""
 	dockerCommand := ""
 	dockerArgs := make([]string, 0)
@@ -46,6 +46,7 @@ func BuildArgs(conf *[]config.Value) []string {
 	}
 
 	if dockerImage != "" {
+		// check if dockerImage != "" although this should never happen!
 		args = append(args, dockerImage)
 	}
 	if dockerCommand != "" {

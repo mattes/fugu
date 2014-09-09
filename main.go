@@ -20,6 +20,9 @@ func main() {
 			case "--version":
 				fmt.Println(version.Version)
 				os.Exit(0)
+			case "--help":
+				printUsage()
+				os.Exit(0)
 			}
 		}
 	}
@@ -30,9 +33,9 @@ func main() {
 	}
 	command := args[1]
 
-	// check command upfront
+	// check commands upfront
 	if command != "run" && command != "build" {
-		fmt.Println("invalid command")
+		printUsage()
 		os.Exit(1)
 	}
 
@@ -57,7 +60,7 @@ func main() {
 	}
 	fugufilePath, fugufilePathGiven = cli.FindFugufile(possibleFugufilePath, fugufileSearchFiles)
 	if fugufilePath == "" {
-		fmt.Println("Please create fugufile or specify path to fugufile.")
+		fmt.Printf("No %v found.", fugufileSearchFiles[0])
 		os.Exit(1)
 	}
 
@@ -90,7 +93,13 @@ func main() {
 	switch command {
 	case "run":
 		cli.CmdRun(fugufilePath, dockerArgs, label)
+	case "build":
+		cli.CmdBuild(fugufilePath, dockerArgs, label)
 	}
+}
+
+func printUsage() {
+
 }
 
 func isLabel(label string, search []string) bool {

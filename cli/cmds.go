@@ -3,6 +3,8 @@ package cli
 import (
 	"fmt"
 	"github.com/mattes/fugu/config"
+	"github.com/mattes/fugu/docker"
+	"github.com/mattes/fugu/file"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -72,7 +74,7 @@ func CmdRun(fugufilePath string, args []string, label string) {
 		os.Exit(1)
 	}
 
-	a := BuildArgs(&conf)
+	a := BuildRunArgs(&conf)
 	a = append(a, "")
 	copy(a[1:], a[0:])
 	a[0] = "run"
@@ -86,11 +88,83 @@ func CmdRun(fugufilePath string, args []string, label string) {
 	cmd.Run()
 }
 
-// func CmdBuild(fugufilePath string, args []string, label string) {
-// 	conf := config.RunConfig
-// 	err := MergeConfig(nil, args, label, &conf)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		os.Exit(1)
-// 	}
-// }
+func CmdBuild(fugufilePath string, args []string, label string) {
+
+	// use image as --tag option
+	var fugufileConf = []config.Value{
+		&config.StringValue{Name: []string{"image"}},
+	}
+
+	// docker options
+	// see http://docs.docker.com/reference/commandline/cli/#build
+
+	var dockerBuildConf = []config.Value{
+		// add new option: path
+		&config.StringValue{Name: []string{"path"}},
+
+		&config.BoolValue{Name: []string{"force-rm"}},
+		&config.BoolValue{Name: []string{"no-cache"}},
+		&config.BoolValue{Name: []string{"quit", "q"}},
+		&config.BoolValue{Name: []string{"rm"}},
+		&config.StringValue{Name: []string{"tag", "t"}},
+	}
+
+	// read fugufile
+	data, err := ioutil.ReadFile(fugufilePath)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// parse fugufile
+	_, err = file.Load(data, label, &fugufileConf)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// parse docker args
+	err = docker.Load(args, &dockerBuildConf)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// build docker build args
+	dockerTag := ""
+	dockerPath := ""
+	a := []string{"build"}
+	for _, c := range dockerBuildConf {
+		if c.Names()[0] == "tag" {
+			dockerTag = c.Get().(string)
+		} else if c.Names()[0] == "path" {
+			dockerPath = c.Get().(string)
+		} else {
+			v := c.Arg()
+			if len(v) > 0 {
+				a = append(a, c.Arg()...)
+			}
+		}
+	}
+
+	// append dockerImage
+	if dockerTag == "" {
+		dockerImage := fugufileConf[0].Get().(string)
+		a = append(a, fmt.Sprintf(`--tag="%v"`, dockerImage))
+	}
+
+	// get path | url | -
+	if dockerPath != "" {
+		a = append(a, dockerPath)
+	} else {
+		a = append(a, ".")
+	}
+
+	fmt.Println("docker", strings.Join(a, " "))
+
+	cmd := exec.Command("docker", a...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.Run()
+}

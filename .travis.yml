@@ -1,5 +1,8 @@
 language: go
 
+before_script:
+  - go get -u
+
 go:
   - 1.2
   - 1.3

@@ -1,5 +1,5 @@
 a-team: &a-team
-  image: a-team/action
+  image: a_team/action
   detach: true
 
 hannibal:
@@ -28,4 +28,3 @@ face:
   <<: *a-team
   name: face
   command: /home/kippo/start.sh
-
