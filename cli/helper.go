@@ -1,8 +1,6 @@
 package cli
 
 import (
-	// "fmt"
-	// "github.com/davecgh/go-spew/spew"
 	"github.com/mattes/fugu/config"
 	"github.com/mattes/fugu/docker"
 	"github.com/mattes/fugu/file"
@@ -22,8 +20,6 @@ func MergeConfig(fugufileData []byte, args []string, label string, conf *[]confi
 	if err != nil {
 		return err
 	}
-
-	// spew.Dump(conf)
 
 	return nil
 }
@@ -56,8 +52,6 @@ func BuildArgs(conf *[]config.Value) []string {
 		args = append(args, dockerCommand)
 	}
 	if len(dockerArgs) > 0 {
-		// TODO replace existing args with this here
-		// fmt.Printf("---%s---\n%#v\n^^^^^^\n", "dockerArgs", dockerArgs)
 		args = append(args, dockerArgs...)
 	}
 

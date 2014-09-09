@@ -119,9 +119,7 @@ func Load(args []string, conf *[]config.Value) error {
 			}
 
 			if namesMatch {
-
 				if flagWasDefined(c.Names(), args) {
-
 					switch typeStr {
 					case "*mflag.stringValue":
 						err = c.Set(f.Value.String())

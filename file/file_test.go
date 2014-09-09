@@ -267,20 +267,18 @@ default:
 	},
 
 	// test if first label is fetched
-	// TODO(mattes): this is buggy, because we cannot garantuee the sort order
-	// see comments in file.go
-	// {
-	// 	labelData1,
-	// 	"",
-	// 	[]string{"label", "another-label"},
-	// 	[]config.Value{
-	// 		&config.StringValue{Name: []string{"name"}, Value: "test", Defined: true},
-	// 		&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Defined: true},
-	// 		&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"8080:80"}, Defined: true},
-	// 		&config.StringValue{Name: []string{"non-exist"}, Defined: false},
-	// 	},
-	// 	false,
-	// },
+	{
+		labelData1,
+		"",
+		[]string{"label", "another-label"},
+		[]config.Value{
+			&config.StringValue{Name: []string{"name"}, Value: "test", Defined: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Defined: true},
+			&config.StringSliceValue{Name: []string{"publish"}, Value: []string{"8080:80"}, Defined: true},
+			&config.StringValue{Name: []string{"non-exist"}, Defined: false},
+		},
+		false,
+	},
 }
 
 func TestLoad(t *testing.T) {

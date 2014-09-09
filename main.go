@@ -87,8 +87,6 @@ func main() {
 	}
 	dockerArgs := args[offsetCount:]
 
-	// fmt.Println(dockerArgs)
-
 	switch command {
 	case "run":
 		cli.CmdRun(fugufilePath, dockerArgs, label)
