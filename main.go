@@ -28,7 +28,7 @@ func main() {
 	}
 
 	if argsLen <= 1 {
-		fmt.Println("no cmd")
+		printUsage()
 		os.Exit(1)
 	}
 	command := args[1]
@@ -99,7 +99,12 @@ func main() {
 }
 
 func printUsage() {
+	fmt.Println(`usage: fugu <command> [fugufile] [label] [docker-options]
 
+commands:
+  run         wraps docker run
+  build       wraps docker build
+`)
 }
 
 func isLabel(label string, search []string) bool {
