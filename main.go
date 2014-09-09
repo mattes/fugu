@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/mattes/fugu/cli"
+	"github.com/mattes/fugu/version"
 	"os"
 )
 
@@ -11,6 +12,18 @@ var fugufileSearchFiles = []string{"fugu.yml", "fugu.yaml", ".fugu.yml", ".fugu.
 func main() {
 	args := os.Args
 	argsLen := len(args)
+
+	// cherry-pick some arguments
+	if argsLen > 1 {
+		for _, a := range args[1:] {
+			switch a {
+			case "--version":
+				fmt.Println(version.Version)
+				os.Exit(0)
+			}
+		}
+	}
+
 	if argsLen <= 1 {
 		fmt.Println("no cmd")
 		os.Exit(1)
