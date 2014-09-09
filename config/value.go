@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"strconv"
-	"strings"
 )
 
 var (
@@ -11,13 +10,12 @@ var (
 )
 
 type Value interface {
-	// yaml.Setter
 	Names() []string
 	Set(value interface{}) error
 	Get() interface{}
 
 	// Args returns a slice of strings to be used in exec args.
-	Arg() string
+	Arg() []string
 }
 
 type StringSliceValue struct {
@@ -26,18 +24,22 @@ type StringSliceValue struct {
 	Defined bool
 }
 
-func (v *StringSliceValue) Arg() (out string) {
+func (v *StringSliceValue) Arg() (out []string) {
 	if v.Defined {
-		args := make([]string, 0)
+		out = make([]string, 0)
 		for _, v2 := range v.Value {
-			args = append(args, fmt.Sprintf(`--%s="%s"`, v.Name[0], v2))
+			out = append(out, fmt.Sprintf(`--%s="%s"`, v.Name[0], v2))
 		}
-		out = strings.Join(args, " ")
 	}
 	return
 }
 
 func (v *StringSliceValue) Set(value interface{}) error {
+	// replace existing value if already set
+	if v.Defined == true {
+		v.Value = make([]string, 0)
+	}
+
 	v.Defined = true
 	switch value.(type) {
 	case []string:
@@ -68,9 +70,13 @@ type BoolValue struct {
 	Defined bool
 }
 
-func (v *BoolValue) Arg() (out string) {
+func (v *BoolValue) Arg() (out []string) {
 	if v.Defined {
-		out = fmt.Sprintf(`--%s=%v`, v.Name[0], v.Value)
+		if v.Value == false {
+			out = []string{fmt.Sprintf(`--%s=%v`, v.Name[0], v.Value)}
+		} else {
+			out = []string{fmt.Sprintf(`--%s`, v.Name[0])}
+		}
 	}
 	return
 }
@@ -106,9 +112,9 @@ type Int64Value struct {
 	Defined bool
 }
 
-func (v *Int64Value) Arg() (out string) {
+func (v *Int64Value) Arg() (out []string) {
 	if v.Defined {
-		out = fmt.Sprintf(`--%s=%v`, v.Name[0], v.Value)
+		out = []string{fmt.Sprintf(`--%s=%v`, v.Name[0], v.Value)}
 	}
 	return
 }
@@ -137,9 +143,9 @@ type StringValue struct {
 	Defined bool
 }
 
-func (v *StringValue) Arg() (out string) {
+func (v *StringValue) Arg() (out []string) {
 	if v.Defined {
-		out = fmt.Sprintf(`--%s="%v"`, v.Name[0], v.Value)
+		out = []string{fmt.Sprintf(`--%s="%v"`, v.Name[0], v.Value)}
 	}
 	return
 }

@@ -6,9 +6,7 @@ hannibal:
   <<: *a-team
   command: echo
   args:
-    - "I love it when a plan comes together."
-  detach: false
-  rm: true
+    - I love it when a plan comes together.
 
 ba:
   <<: *a-team

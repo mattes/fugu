@@ -34,11 +34,99 @@ image: mattes/foobar
 		[]byte(`
 name: test
 image: mattes/foobar
-  `),
+publish: 20000:20001
+`),
+		[]string{"--name", "foobar", "--rm", "-p", "20002:20003"},
+		[]config.Value{
+			&config.StringValue{Name: []string{"command"}, Value: "", Defined: false},
+			&config.StringSliceValue{Name: []string{"args"}, Value: nil, Defined: false},
+			&config.StringValue{Name: []string{"name"}, Value: "foobar", Defined: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Defined: true},
+			&config.BoolValue{Name: []string{"rm"}, Value: true, Defined: true},
+			&config.StringSliceValue{Name: []string{"publish", "p"}, Value: []string{"20002:20003"}, Defined: true},
+			&config.Int64Value{Name: []string{"non-exist"}, Defined: false},
+		},
+		false,
+	},
+	{
+		[]byte(`
+name: test
+image: mattes/foobar
+`),
 		[]string{"--name", "foobar", "--rm", "echo", `"hello world"`},
 		[]config.Value{
 			&config.StringValue{Name: []string{"command"}, Value: "echo", Defined: true},
 			&config.StringSliceValue{Name: []string{"args"}, Value: []string{`"hello world"`}, Defined: true},
+			&config.StringValue{Name: []string{"name"}, Value: "foobar", Defined: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Defined: true},
+			&config.BoolValue{Name: []string{"rm"}, Value: true, Defined: true},
+			&config.StringSliceValue{Name: []string{"publish", "p"}, Value: nil, Defined: false},
+			&config.Int64Value{Name: []string{"non-exist"}, Defined: false},
+		},
+		false,
+	},
+	{
+		[]byte(`
+name: test
+image: mattes/foobar
+`),
+		[]string{"--name", "foobar", "--rm=false"},
+		[]config.Value{
+			&config.StringValue{Name: []string{"command"}, Value: "", Defined: false},
+			&config.StringSliceValue{Name: []string{"args"}, Value: nil, Defined: false},
+			&config.StringValue{Name: []string{"name"}, Value: "foobar", Defined: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Defined: true},
+			&config.BoolValue{Name: []string{"rm"}, Value: false, Defined: true},
+			&config.StringSliceValue{Name: []string{"publish", "p"}, Value: nil, Defined: false},
+			&config.Int64Value{Name: []string{"non-exist"}, Defined: false},
+		},
+		false,
+	},
+	{
+		[]byte(`
+name: test
+image: mattes/foobar
+rm: true
+`),
+		[]string{"--name", "foobar", "--rm=false"},
+		[]config.Value{
+			&config.StringValue{Name: []string{"command"}, Value: "", Defined: false},
+			&config.StringSliceValue{Name: []string{"args"}, Value: nil, Defined: false},
+			&config.StringValue{Name: []string{"name"}, Value: "foobar", Defined: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Defined: true},
+			&config.BoolValue{Name: []string{"rm"}, Value: false, Defined: true},
+			&config.StringSliceValue{Name: []string{"publish", "p"}, Value: nil, Defined: false},
+			&config.Int64Value{Name: []string{"non-exist"}, Defined: false},
+		},
+		false,
+	},
+	{
+		[]byte(`
+name: test
+image: mattes/foobar
+rm: false
+`),
+		[]string{"--name", "foobar", "--rm=true"},
+		[]config.Value{
+			&config.StringValue{Name: []string{"command"}, Value: "", Defined: false},
+			&config.StringSliceValue{Name: []string{"args"}, Value: nil, Defined: false},
+			&config.StringValue{Name: []string{"name"}, Value: "foobar", Defined: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Defined: true},
+			&config.BoolValue{Name: []string{"rm"}, Value: true, Defined: true},
+			&config.StringSliceValue{Name: []string{"publish", "p"}, Value: nil, Defined: false},
+			&config.Int64Value{Name: []string{"non-exist"}, Defined: false},
+		},
+		false,
+	},
+	{
+		[]byte(`
+name: test
+image: mattes/foobar
+`),
+		[]string{"--name", "foobar", "--rm=true"},
+		[]config.Value{
+			&config.StringValue{Name: []string{"command"}, Value: "", Defined: false},
+			&config.StringSliceValue{Name: []string{"args"}, Value: nil, Defined: false},
 			&config.StringValue{Name: []string{"name"}, Value: "foobar", Defined: true},
 			&config.StringValue{Name: []string{"image"}, Value: "mattes/foobar", Defined: true},
 			&config.BoolValue{Name: []string{"rm"}, Value: true, Defined: true},
@@ -82,12 +170,13 @@ var buildArgsTest = []struct {
 			&config.StringSliceValue{Name: []string{"args"}, Value: []string{"hello", "world"}, Defined: true},
 			&config.StringValue{Name: []string{"name"}, Value: "foobar", Defined: true},
 			&config.StringValue{Name: []string{"image"}, Value: "mattes/image", Defined: true},
-			&config.BoolValue{Name: []string{"rm"}, Value: false, Defined: true},
+			&config.BoolValue{Name: []string{"rm"}, Value: true, Defined: true},
+			&config.BoolValue{Name: []string{"detach", "d"}, Value: false, Defined: true},
 			&config.StringSliceValue{Name: []string{"publish", "p"}, Value: []string{"50:60", "70:80", "90:100"}, Defined: true},
 			&config.Int64Value{Name: []string{"non-exist"}, Value: 5, Defined: false},
 		},
-		[]string{`--name="foobar"`, `--rm=false`,
-			`--publish="50:60" --publish="70:80" --publish="90:100"`,
+		[]string{`--name="foobar"`, `--rm`, `--detach=false`,
+			`--publish="50:60"`, `--publish="70:80"`, `--publish="90:100"`,
 			"mattes/image", "echo", "hello", "world"},
 	},
 }

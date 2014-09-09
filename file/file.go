@@ -2,14 +2,13 @@
 package file
 
 import (
-	"errors"
+	"fmt"
 	"github.com/mattes/fugu/config"
 	"github.com/mattes/yaml"
-	"io/ioutil"
 )
 
 var (
-	ErrInvalidYaml = errors.New("Invalid YAML format. Did you set an `image` variable?")
+	ErrInvalidYaml = fmt.Errorf("Invalid YAML format. Did you set an `image` variable?")
 )
 
 type Label struct {
@@ -17,15 +16,11 @@ type Label struct {
 	Config map[string]interface{}
 }
 
-func LoadFile(filepath, label string, conf *[]config.Value) (allLabelNames []string, err error) {
-	data, err := ioutil.ReadFile(filepath)
-	if err != nil {
-		return nil, err
-	}
-	return Load(data, label, conf)
-}
-
 func Load(data []byte, label string, conf *[]config.Value) (allLabelNames []string, err error) {
+	if conf == nil {
+		panic("Provide conf *[]config.Value")
+	}
+
 	if label == "" {
 		label = "default"
 	}
@@ -36,11 +31,7 @@ func Load(data []byte, label string, conf *[]config.Value) (allLabelNames []stri
 	}
 
 	if len(labels) > 0 {
-
-		// TODO(mattes): this is buggy, because we cannot garantuee the sort order
-		// see https://github.com/go-yaml/yaml/issues/30
-
-		useLabel := labels[0]
+		useLabel := labels[0] // use first label per default
 		for _, l := range labels {
 			allLabelNames = append(allLabelNames, l.Name)
 			if label == l.Name {
@@ -68,9 +59,16 @@ func Load(data []byte, label string, conf *[]config.Value) (allLabelNames []stri
 func parse(data []byte) ([]Label, error) {
 	config := make([]Label, 0)
 
+	// TODO take care of yaml map[] order
+	// we use a fork atm, see https://github.com/mattes/yaml
+	// this fork includes a quick work-around to keep track of
+	// the order of the labels in the yaml file. (see yaml.StringIndex type)
+	//
+	// let's use this until https://github.com/go-yaml/yaml/issues/30 is done
+
 	// test if labels are used
 	var labels bool
-	preConfig := make(map[string]interface{})
+	preConfig := make(map[yaml.StringIndex]interface{})
 	if err := yaml.Unmarshal(data, &preConfig); err != nil {
 		return config, err
 	}
@@ -79,46 +77,60 @@ func parse(data []byte) ([]Label, error) {
 		return config, ErrInvalidYaml
 	}
 
-	if _, ok := preConfig["image"]; ok {
-		labels = false
-	} else {
-		labels = true
+	// range over yaml.StringIndex to check if image tag is in top-level
+	labels = true
+	for k, _ := range preConfig {
+		if k.Value == "image" {
+			labels = false
+			break
+		}
 	}
 
 	// align config depending on labels
 	if !labels {
 		// when no labels are used, prepend `default` label
+
+		// but first convert from map[yaml.StringIndex]interface{} to map[string]interface{}
+		newPreConf := make(map[string]interface{})
+		for k, v := range preConfig {
+			newPreConf[k.Value] = v
+		}
+
 		config = append(config, Label{
 			Name:   "default",
-			Config: preConfig, // is map[string]interface{}
+			Config: newPreConf, // is map[string]interface{}
 		})
 	} else {
+
 		// labels are used, convert some types
+		preConfigIndex := 0
+		for _, _ = range preConfig {
+			for label, v := range preConfig {
+				if label.Index == preConfigIndex {
+					preConfigIndex += 1
 
-		// TODO(mattes): see comment from above
-		// preConfig should reflect the order from the yaml file itself
-
-		for label, v := range preConfig {
-			vNew := make(map[string]interface{})
-			switch v.(type) {
-			case map[interface{}]interface{}:
-				imageFound := false
-				for k2, v2 := range v.(map[interface{}]interface{}) {
-					vNew[k2.(string)] = v2
-					if k2.(string) == "image" {
-						imageFound = true
+					vNew := make(map[string]interface{})
+					switch v.(type) {
+					case map[interface{}]interface{}:
+						imageFound := false
+						for k2, v2 := range v.(map[interface{}]interface{}) {
+							vNew[k2.(string)] = v2
+							if k2.(string) == "image" {
+								imageFound = true
+							}
+						}
+						if !imageFound {
+							return config, ErrInvalidYaml
+						}
+					default:
+						return config, ErrInvalidYaml
 					}
+					config = append(config, Label{
+						Name:   label.Value,
+						Config: vNew, // is map[string]interface{}
+					})
 				}
-				if !imageFound {
-					return config, ErrInvalidYaml
-				}
-			default:
-				return config, ErrInvalidYaml
 			}
-			config = append(config, Label{
-				Name:   label,
-				Config: vNew, // is map[string]interface{}
-			})
 		}
 	}
 

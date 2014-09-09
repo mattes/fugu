@@ -1,9 +1,13 @@
 package cli
 
 import (
+	// "fmt"
+	// "github.com/davecgh/go-spew/spew"
 	"github.com/mattes/fugu/config"
 	"github.com/mattes/fugu/docker"
 	"github.com/mattes/fugu/file"
+	"io/ioutil"
+	"os"
 )
 
 func MergeConfig(fugufileData []byte, args []string, label string, conf *[]config.Value) error {
@@ -18,6 +22,8 @@ func MergeConfig(fugufileData []byte, args []string, label string, conf *[]confi
 	if err != nil {
 		return err
 	}
+
+	// spew.Dump(conf)
 
 	return nil
 }
@@ -38,7 +44,7 @@ func BuildArgs(conf *[]config.Value) []string {
 		} else {
 			v := c.Arg()
 			if len(v) > 0 {
-				args = append(args, c.Arg())
+				args = append(args, c.Arg()...)
 			}
 		}
 	}
@@ -50,13 +56,38 @@ func BuildArgs(conf *[]config.Value) []string {
 		args = append(args, dockerCommand)
 	}
 	if len(dockerArgs) > 0 {
+		// TODO replace existing args with this here
+		// fmt.Printf("---%s---\n%#v\n^^^^^^\n", "dockerArgs", dockerArgs)
 		args = append(args, dockerArgs...)
 	}
 
 	return args
 }
 
-func FindFugufile(searchFiles []string) (string, error) {
+func FindFugufile(filepath string, searchFilePaths []string) (fugufilePath string, viaFugufilePath bool) {
+	// does the file exist?
+	if _, err := os.Stat(filepath); err == nil {
+		return filepath, false
+	}
 
-	return "", nil
+	// filepath does not exist.
+	// let's try our searchFilePaths
+	for _, f := range searchFilePaths {
+		if _, err := os.Stat(f); err == nil {
+			return f, false
+		}
+	}
+
+	// no file found in searchFilePaths
+	return "", false
+}
+
+// GetAllLabels reads all labels from a given yaml file
+func GetAllLabels(filepath string) ([]string, error) {
+	data, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+	c := []config.Value{}
+	return file.Load(data, "", &c)
 }
