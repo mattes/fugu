@@ -26,6 +26,7 @@ $ fugu run -e VERY=nice # runs ...
 docker run --detach --name="hello-world-nginx" --env="VERY=nice" --publish="8080:80" mattes/hello-world-nginx
 ```
 
+All [docker run options](http://docs.docker.com/reference/commandline/cli/#run) are supported.
 Multiple configurations are supported per fugu.yml with labels. See [advanced fugu.yml](fugu.example.yml).
 
 
