@@ -3,6 +3,7 @@ language: go
 before_script:
   - go get -t -d
   - go get -d github.com/davecgh/go-spew/spew
+  - go get -d github.com/stretchr/testify/require
 
 script:
   - make test
