@@ -1,25 +1,32 @@
 fugu
 ====
 
-[![Build Status](https://travis-ci.org/mattes/fugu.svg?branch=master)](https://travis-ci.org/mattes/fugu)
-[![GoDoc](https://godoc.org/github.com/mattes/fugu?status.svg)](https://godoc.org/github.com/mattes/fugu)
+# What is fugu?
+
+ * fugu is a wrapper around docker run & build commands.
+ * fugu loads arguments from a fugu.yml file and 
+   merges these arguments with cli options.
+ * fugu is NOT an orchestration tool like [fig](https://github.com/docker/fig). 
+
+ 
+__Example__
 
 
-__fugu helps you to quickly run a container by storing arguments in a YAML file.__
+```yml
+# fugu.yml (maybe stored next to Dockerfile)
+image:  mattes/hello-world-nginx # mandatory
+name:   hello-world-nginx
+detach: true
+publish:
+  - 8080:80
+```
 
-__Why?__ We are working on [developermail.io](https://developermail.io) atm. 
-The project uses a microservice architecture and consists of >15 docker images. 
-During development a docker container is built, run and destroyed quite often.
-With fugu we can speed up this workflow, because all ``docker run`` arguments
-are stored in the ``fugu.yml`` file. We also used to put ``docker run`` statements 
-in ``README.md``, but the format wasn't consistent. Now ``fugu.yml`` is our second point of contact 
-(after the Dockerfile itself), when looking at a new docker image. 
-We didn't want to use fig, because the set of containers we run during
-development changes often and we didn't want to keep one ``fig.yml`` for every
-possible docker container combination.
+```bash
+$ fugu run -e VERY=nice # runs ...
+docker run --detach --name="hello-world-nginx" --env="VERY=nice" --publish="8080:80" mattes/hello-world-nginx
+```
 
-Please note: fugu is not an orchestration tool like [fig](https://github.com/docker/fig). 
-It is just a simple wrapper around ``docker run``.
+Multiple configurations are supported per fugu.yml with labels. See [advanced fugu.yml](fugu.example.yml).
 
 
 # Installation
@@ -31,56 +38,22 @@ go get github.com/mattes/fugu
 ```
 
 
-# Usage
+# Why fugu?
 
-1) Create a ``fugu.yml`` file (maybe next to Dockerfile) and specify ``docker run``
-[options](http://docs.docker.com/reference/commandline/cli/#run). 
-Valid variables are ``image`` (mandatory), ``command``, ``args``, and all other option variables
-like ``publish`` or ``name``. The YAML file looks nicer if you don't use the
-one-letter alias variables.
-
-```yml
-name: hello-world-nginx
-image: mattes/hello-world-nginx # mandatory
-detach: true
-publish: 
-  - 80:80
-```
-
-2) Use ``fugu`` to run the container
-
-```bash
-# in directory where fugu.yml is saved
-fugu run
-```
-
-3) Profit!
+We are working on [developermail.io](https://developermail.io) atm. 
+The project uses a microservice architecture and consists of lots of docker images. 
+During development a docker container is built, run and destroyed quite often.
+With fugu we can speed up this workflow, because all ``docker run`` arguments
+are stored in the ``fugu.yml`` file. We also used to put ``docker run`` statements 
+in ``README.md``, but the format wasn't consistent. Now ``fugu.yml`` is our second point of contact 
+(after the ``Dockerfile`` itself), when looking at a new docker image somebody else created.
+We didn't want to use fig, because the set of containers we run during
+development changes often and we didn't want to keep one ``fig.yml`` for every
+possible docker container combination.
 
 
-# Advanced usage
+---
 
-```bash
-fugu run [fugu.yml-path] [label] [docker-run-options] [image] [command] [args]
-fugu build [fugu.yml-path] [label] [docker-build-options] [path=pwd|url|-]
-```
+[![Build Status](https://travis-ci.org/mattes/fugu.svg?branch=master)](https://travis-ci.org/mattes/fugu)
+[![GoDoc](https://godoc.org/github.com/mattes/fugu?status.svg)](https://godoc.org/github.com/mattes/fugu)
 
-Labels can be used for different configuration settings. See an example ``fugu.yml``:
-
-```yml
-production: &production
-  name: hello-world-nginx
-  image: mattes/hello-world-nginx
-  detach: true
-  publish: 
-    - 80:80
-
-development:
-  <<: *production # inherit from production label
-  detach: false
-  tty: true
-  interactive: true
-  publish:
-    - 8080:80
-```
-
-When no label argument is given, fugu will use the first label found in ``fugu.yml``.
