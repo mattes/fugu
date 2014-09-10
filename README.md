@@ -42,7 +42,7 @@ curl -L https://github.com/mattes/fugu/releases/download/0.1.0/fugu.0.1.0.linux.
 mv fugu.0.1.0.linux.x86_64 /usr/local/bin/fugu
 chmod +x /usr/local/bin/fugu
 
-# if you have GO installed
+# from source, if you have GO installed
 go get github.com/mattes/fugu
 ```
 
