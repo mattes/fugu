@@ -12,7 +12,7 @@ image: name # always mandatory
 
 You can use labels for different settings. 
 It is possible to inherit options from other labels. 
-See [advanced example](fugu.example.yml).
+See [advanced fugufile](fugu.example.yml).
 
 ```
 [label]
