@@ -99,7 +99,7 @@ func main() {
 }
 
 func printUsage() {
-	fmt.Println(`usage: fugu <command> [fugufile] [label] [docker-options]
+	fmt.Println(`usage: fugu <command> [fugufile] [label] [docker-options] [command] [args...]
 
 commands:
   run         wraps docker run
