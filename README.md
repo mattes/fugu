@@ -3,14 +3,13 @@ fugu
 
 ## What is fugu?
 
- * fugu is a ``docker run`` wrapper
- * fugu loads ``run`` arguments from a fugu.yml file and 
+ * fugu is a wrapper around docker [run|build] commands
+ * fugu loads arguments from a fugu.yml file and 
    merges these arguments with command line arguments
- * Usage: ``fugu <command> [fugufile] [label] [docker-options]``
  * fugu is NOT an orchestration tool like [fig](https://github.com/docker/fig). 
 
  
-Example ``fugu.yml``
+__Example ``fugu.yml``__
 
 ```yml
 image:  mattes/hello-world-nginx # mandatory
@@ -20,7 +19,14 @@ publish:
   - 8080:80
 ```
 
+```bash
+$ fugu run -e VERY=nice
+runs ...
+docker run --detach --name="hello-world-nginx" --env="VERY=nice" --publish="8080:80" mattes/hello-world-nginx
+```
+
 Multiple configurations are supported per fugu.yml with labels. See [advanced fugu.yml](fugu.example.yml)).
+
 
 # Installation
 
@@ -29,6 +35,7 @@ go get github.com/mattes/fugu
 
 # TODO: release pre-compiled versions
 ```
+
 
 ## Why fugu?
 
