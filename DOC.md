@@ -66,3 +66,11 @@ fugu build [fugufile] [label] [docker-options]
  * `--tag` option (if not set via cli) will be filled with `image` variable from fugufile
  * you can use `--path` to build the image from source code at path. defaults to current directoy.
 ```
+
+
+## others
+
+```
+fugu --version
+fugu --help
+```
