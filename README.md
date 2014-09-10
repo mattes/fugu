@@ -1,5 +1,4 @@
-fugu
-====
+<img src="fugu.png" height="200">
 
 # What is fugu?
 
