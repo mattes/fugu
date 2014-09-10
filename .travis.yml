@@ -2,7 +2,7 @@ language: go
 
 before_script:
   - go get
-  - go get github.com/davecgh/go-spew
+  - go get github.com/davecgh/go-spew >/dev/null 2>&1
 
 script:
   - make test
