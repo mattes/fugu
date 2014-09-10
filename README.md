@@ -56,7 +56,7 @@ are stored in the ``fugu.yml`` file. We also used to put ``docker run`` statemen
 in ``README.md``, but the format wasn't consistent. Now ``fugu.yml`` is our second point of contact 
 (after the ``Dockerfile`` itself), when looking at a new docker image somebody else created.
 We didn't want to use fig, because the set of containers we run during
-development changes often and we didn't want to keep one ``fig.yml`` for every
+development changes often and we didn't want to have one ``fig.yml`` for every
 possible docker container combination.
 
 
