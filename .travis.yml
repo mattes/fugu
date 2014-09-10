@@ -1,8 +1,7 @@
 language: go
 
 before_script:
-  - go get
-  - go get github.com/davecgh/go-spew/spew
+  - go get -t -d
 
 script:
   - make test
