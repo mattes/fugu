@@ -13,6 +13,7 @@ __Example__
 
 
 ```yml
+# fugu.yml (maybe stored next to Dockerfile)
 image:  mattes/hello-world-nginx # mandatory
 name:   hello-world-nginx
 detach: true
