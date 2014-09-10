@@ -34,7 +34,7 @@ func main() {
 	command := args[1]
 
 	// check commands upfront
-	if command != "run" && command != "build" {
+	if command != "run" && command != "build" && command != "destroy" {
 		printUsage()
 		os.Exit(1)
 	}
@@ -95,6 +95,8 @@ func main() {
 		cli.CmdRun(fugufilePath, dockerArgs, label)
 	case "build":
 		cli.CmdBuild(fugufilePath, dockerArgs, label)
+	case "destroy":
+		cli.CmdDestroy(fugufilePath, dockerArgs, label)
 	}
 }
 

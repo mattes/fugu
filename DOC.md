@@ -67,6 +67,20 @@ fugu build [fugufile] [label] [docker-options]
  * you can use `--path` to build the image from source code at path. defaults to current directoy.
 ```
 
+## fugu destroy
+
+this executes docker rm -f 
+
+```
+fugu destroy [fugufile] [label] [options]
+
+options:
+  --name   docker container name
+
+ * fugufile, see above
+ * label, see above
+ * `--name` option (if not set via cli) will be filled with `name` variable from fugufile
+```
 
 ## others
 

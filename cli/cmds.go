@@ -197,3 +197,50 @@ func CmdBuild(fugufilePath string, args []string, label string) {
 	cmd.Stdin = os.Stdin
 	cmd.Run()
 }
+
+func CmdDestroy(fugufilePath string, args []string, label string) {
+
+	var fugufileConf = []config.Value{
+		&config.StringValue{Name: []string{"name"}},
+	}
+
+	// read fugufile
+	data, err := ioutil.ReadFile(fugufilePath)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// parse fugufile
+	_, err = file.Load(data, label, &fugufileConf)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// parse docker args
+	err = docker.Load(args, &fugufileConf)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	a := make([]string, 0)
+	a = append(a, []string{"rm", "-f"}...)
+
+	dockerName := fugufileConf[0].Get()
+	if dockerName != nil {
+		a = append(a, dockerName.(string))
+	} else {
+		fmt.Println("Could not find container name.")
+		os.Exit(1)
+	}
+
+	fmt.Println("docker", strings.Join(a, " "))
+
+	cmd := exec.Command("docker", a...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.Run()
+}
