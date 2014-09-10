@@ -1,15 +1,16 @@
 fugu
 ====
 
-## What is fugu?
+# What is fugu?
 
- * fugu is a wrapper around docker [run|build] commands
+ * fugu is a wrapper around docker run & build commands.
  * fugu loads arguments from a fugu.yml file and 
-   merges these arguments with command line arguments
+   merges these arguments with cli options.
  * fugu is NOT an orchestration tool like [fig](https://github.com/docker/fig). 
 
  
-__Example ``fugu.yml``__
+__Example__
+
 
 ```yml
 image:  mattes/hello-world-nginx # mandatory
@@ -20,12 +21,11 @@ publish:
 ```
 
 ```bash
-$ fugu run -e VERY=nice
-runs ...
+$ fugu run -e VERY=nice # runs ...
 docker run --detach --name="hello-world-nginx" --env="VERY=nice" --publish="8080:80" mattes/hello-world-nginx
 ```
 
-Multiple configurations are supported per fugu.yml with labels. See [advanced fugu.yml](fugu.example.yml)).
+Multiple configurations are supported per fugu.yml with labels. See [advanced fugu.yml](fugu.example.yml).
 
 
 # Installation
@@ -37,7 +37,7 @@ go get github.com/mattes/fugu
 ```
 
 
-## Why fugu?
+# Why fugu?
 
 We are working on [developermail.io](https://developermail.io) atm. 
 The project uses a microservice architecture and consists of >15 docker images. 
