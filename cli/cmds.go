@@ -74,6 +74,26 @@ func CmdRun(fugufilePath string, args []string, label string) {
 		os.Exit(1)
 	}
 
+	// add --interactive and --tty when command or args are given
+	interactive := false
+	dockerCommand := config.Get(conf, "command")
+	if dockerCommand != nil {
+		if dockerCommand.Get().(string) != "" {
+			interactive = true
+		}
+	}
+	dockerArgs := config.Get(conf, "args")
+	if dockerArgs != nil {
+		if len(dockerArgs.Get().([]string)) > 0 {
+			interactive = true
+		}
+	}
+	if interactive {
+		config.Set(&conf, "interactive", true)
+		config.Set(&conf, "tty", true)
+	}
+
+	// finally build args
 	a := BuildRunArgs(&conf)
 	a = append(a, "")
 	copy(a[1:], a[0:])
