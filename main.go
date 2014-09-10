@@ -104,7 +104,8 @@ func printUsage() {
 commands:
   run         wraps docker run
   build       wraps docker build
-`)
+
+See https://github.com/mattes/fugu/blob/v` + version.Version + `/DOC.md for more help.`)
 }
 
 func isLabel(label string, search []string) bool {
