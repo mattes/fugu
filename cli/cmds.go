@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 )
 
@@ -95,6 +96,8 @@ func CmdRun(fugufilePath string, args []string, label string) {
 
 	// finally build args
 	a := BuildRunArgs(&conf)
+	sort.Sort(sort.StringSlice(a))
+
 	a = append(a, "")
 	copy(a[1:], a[0:])
 	a[0] = "run"
@@ -153,7 +156,7 @@ func CmdBuild(fugufilePath string, args []string, label string) {
 	// build docker build args
 	dockerTag := ""
 	dockerPath := ""
-	a := []string{"build"}
+	a := make([]string, 0)
 	for _, c := range dockerBuildConf {
 		if c.Names()[0] == "tag" {
 			dockerTag = c.Get().(string)
@@ -173,12 +176,18 @@ func CmdBuild(fugufilePath string, args []string, label string) {
 		a = append(a, fmt.Sprintf(`--tag="%v"`, dockerImage))
 	}
 
+	sort.Sort(sort.StringSlice(a))
+
 	// get path | url | -
 	if dockerPath != "" {
 		a = append(a, dockerPath)
 	} else {
 		a = append(a, ".")
 	}
+
+	a = append(a, "")
+	copy(a[1:], a[0:])
+	a[0] = "build"
 
 	fmt.Println("docker", strings.Join(a, " "))
 
