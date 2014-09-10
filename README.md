@@ -65,3 +65,7 @@ possible docker container combination.
 [![Build Status](https://travis-ci.org/mattes/fugu.svg?branch=master)](https://travis-ci.org/mattes/fugu)
 [![GoDoc](https://godoc.org/github.com/mattes/fugu?status.svg)](https://godoc.org/github.com/mattes/fugu)
 
+
+### Credits
+
+Thanks to [Thiago Lifter](www.thiagolifter.com.br) for his nice fugu fish logo.
