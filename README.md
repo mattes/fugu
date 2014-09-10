@@ -68,4 +68,4 @@ possible docker container combination.
 
 ### Credits
 
-Thanks to [Thiago Lifter](www.thiagolifter.com.br) for his nice fugu fish logo.
+Thanks to [Thiago Lifter](http://www.thiagolifter.com.br) for his nice fugu fish logo.
