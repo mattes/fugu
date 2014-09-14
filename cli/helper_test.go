@@ -179,6 +179,21 @@ var buildArgsTest = []struct {
 			`--publish="50:60"`, `--publish="70:80"`, `--publish="90:100"`,
 			"mattes/image", "echo", "hello", "world"},
 	},
+	{
+		[]config.Value{
+			&config.StringValue{Name: []string{"command"}, Value: "/bin/bash", Defined: true},
+			&config.StringSliceValue{Name: []string{"args"}, Value: []string{"-c", "foo"}, Defined: true},
+			&config.StringValue{Name: []string{"name"}, Value: "foobar", Defined: true},
+			&config.StringValue{Name: []string{"image"}, Value: "mattes/image", Defined: true},
+			&config.BoolValue{Name: []string{"rm"}, Value: true, Defined: true},
+			&config.BoolValue{Name: []string{"detach", "d"}, Value: false, Defined: true},
+			&config.StringSliceValue{Name: []string{"publish", "p"}, Value: []string{"50:60", "70:80", "90:100"}, Defined: true},
+			&config.Int64Value{Name: []string{"non-exist"}, Value: 5, Defined: false},
+		},
+		[]string{`--name="foobar"`, `--rm`, `--detach=false`,
+			`--publish="50:60"`, `--publish="70:80"`, `--publish="90:100"`,
+			"mattes/image", "/bin/bash", "-c", "foo"},
+	},
 }
 
 func TestBuildRunArgs(t *testing.T) {

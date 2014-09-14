@@ -96,7 +96,6 @@ func CmdRun(fugufilePath string, args []string, label string) {
 
 	// finally build args
 	a := BuildRunArgs(&conf)
-	sort.Sort(sort.StringSlice(a))
 
 	a = append(a, "")
 	copy(a[1:], a[0:])

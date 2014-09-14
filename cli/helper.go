@@ -6,6 +6,7 @@ import (
 	"github.com/mattes/fugu/file"
 	"io/ioutil"
 	"os"
+	"sort"
 )
 
 func MergeConfig(fugufileData []byte, args []string, label string, conf *[]config.Value) error {
@@ -44,6 +45,8 @@ func BuildRunArgs(conf *[]config.Value) []string {
 			}
 		}
 	}
+
+	sort.Sort(sort.StringSlice(args))
 
 	if dockerImage != "" {
 		// check if dockerImage != "" although this should never happen!
