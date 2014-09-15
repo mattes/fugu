@@ -6,6 +6,7 @@ import (
 	"github.com/mattes/fugu/file"
 	"io/ioutil"
 	"os"
+	"path"
 	"sort"
 )
 
@@ -65,7 +66,10 @@ func BuildRunArgs(conf *[]config.Value) []string {
 func FindFugufile(filepath string, searchFilePaths []string) (fugufilePath string, viaFugufilePath bool) {
 	// does the file exist?
 	if _, err := os.Stat(filepath); err == nil {
-		return filepath, false
+		ext := path.Ext(filepath)
+		if ext == "yml" || ext == "yaml" {
+			return filepath, false
+		}
 	}
 
 	// filepath does not exist.
