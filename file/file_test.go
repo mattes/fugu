@@ -162,6 +162,21 @@ label1:
 		true,
 	},
 
+	{
+		[]byte(`
+image: foo:bar
+`),
+		[]Label{
+			Label{
+				Name: "default",
+				Config: map[string]interface{}{
+					"image": "foo:bar",
+				},
+			},
+		},
+		false,
+	},
+
 	// test non-sense
 	{
 		[]byte(`label1:`),
