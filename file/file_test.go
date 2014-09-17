@@ -5,6 +5,7 @@ import (
 	"github.com/mattes/fugu/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"os"
 	"testing"
 )
 
@@ -314,5 +315,40 @@ func TestLoad(t *testing.T) {
 		}
 		require.Equal(t, tt.out, c, spew.Sdump(tt), spew.Sdump(c))
 		require.Equal(t, tt.allLabelNames, allLabelNames, spew.Sdump(tt))
+	}
+}
+
+var injectEnvVarsTests = []struct {
+	in  []byte
+	out []byte
+}{
+	{
+		[]byte("$FUGU_TEST123"),
+		[]byte("ok"),
+	},
+	{
+		[]byte("foo $FUGU_TEST123 bar"),
+		[]byte("foo ok bar"),
+	},
+	{
+		[]byte("FUGU_TEST123"),
+		[]byte("FUGU_TEST123"),
+	},
+	{
+		[]byte("$fugu_test123"),
+		nil,
+	},
+	{
+		[]byte("$NON_EXISTING_ENV_VAR_123456789"),
+		nil,
+	},
+}
+
+func TestInjectEnvVars(t *testing.T) {
+	os.Setenv("FUGU_TEST123", "ok")
+
+	for _, tt := range injectEnvVarsTests {
+		out := injectEnvVars(tt.in)
+		assert.Equal(t, tt.out, out, spew.Sdump(tt))
 	}
 }

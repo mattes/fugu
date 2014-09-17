@@ -2,9 +2,12 @@
 package file
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mattes/fugu/config"
 	"github.com/mattes/yaml"
+	"os"
+	"regexp"
 )
 
 var (
@@ -15,6 +18,9 @@ type Label struct {
 	Name   string
 	Config map[string]interface{}
 }
+
+// TODO is that regex correct?!
+var envVarRegex = regexp.MustCompile(`\$[a-zA-Z_]+[a-zA-Z0-9_]*`)
 
 func Load(data []byte, label string, conf *[]config.Value) (allLabelNames []string, err error) {
 	if conf == nil {
@@ -58,6 +64,9 @@ func Load(data []byte, label string, conf *[]config.Value) (allLabelNames []stri
 
 func parse(data []byte) ([]Label, error) {
 	config := make([]Label, 0)
+
+	// parse $ENV variables
+	data = injectEnvVars(data)
 
 	// TODO take care of yaml map[] order
 	// we use a fork atm, see https://github.com/mattes/yaml
@@ -135,4 +144,11 @@ func parse(data []byte) ([]Label, error) {
 	}
 
 	return config, nil
+}
+
+// injectEnvVars replaces $ENV vars with their actual value
+func injectEnvVars(value []byte) []byte {
+	return envVarRegex.ReplaceAllFunc(value, func(match []byte) []byte {
+		return []byte(os.Getenv(string(bytes.TrimPrefix(match, []byte("$")))))
+	})
 }
