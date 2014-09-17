@@ -228,7 +228,7 @@ func CmdDestroy(fugufilePath string, args []string, label string) {
 	a = append(a, []string{"rm", "-f"}...)
 
 	dockerName := fugufileConf[0].Get()
-	if dockerName != nil {
+	if dockerName != nil && dockerName != "" {
 		a = append(a, dockerName.(string))
 	} else {
 		fmt.Println("Could not find container name.")
