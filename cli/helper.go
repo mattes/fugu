@@ -67,8 +67,8 @@ func FindFugufile(filepath string, searchFilePaths []string) (fugufilePath strin
 	// does the file exist?
 	if _, err := os.Stat(filepath); err == nil {
 		ext := path.Ext(filepath)
-		if ext == "yml" || ext == "yaml" {
-			return filepath, false
+		if ext == ".yml" || ext == ".yaml" {
+			return filepath, true
 		}
 	}
 
