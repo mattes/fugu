@@ -60,6 +60,7 @@ func CmdRun(fugufilePath string, args []string, label string) {
 		&config.StringSliceValue{Name: []string{"lxc-conf"}},
 		&config.StringSliceValue{Name: []string{"cap-add"}},
 		&config.StringSliceValue{Name: []string{"cap-drop"}},
+		&config.StringSliceValue{Name: []string{"add-host"}},
 	}
 
 	// read fugufile
