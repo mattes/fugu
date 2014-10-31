@@ -13,7 +13,6 @@ import (
 )
 
 func CmdRun(fugufilePath string, args []string, label string) {
-
 	// docker options
 	// see http://docs.docker.com/reference/commandline/cli/#run
 
@@ -112,7 +111,6 @@ func CmdRun(fugufilePath string, args []string, label string) {
 }
 
 func CmdBuild(fugufilePath string, args []string, label string) {
-
 	// use image as --tag option
 	var fugufileConf = []config.Value{
 		&config.StringValue{Name: []string{"image"}},
@@ -198,8 +196,106 @@ func CmdBuild(fugufilePath string, args []string, label string) {
 	cmd.Run()
 }
 
-func CmdDestroy(fugufilePath string, args []string, label string) {
+func CmdExec(fugufilePath string, args []string, label string) {
 
+	var conf = []config.Value{
+		// add new options: image, command and args
+		&config.StringValue{Name: []string{"name"}},
+		&config.StringValue{Name: []string{"command"}},
+		&config.StringSliceValue{Name: []string{"args"}},
+		&config.StringSliceValue{Name: []string{"exec"}},
+		&config.BoolValue{Name: []string{"interactive", "i"}},
+		&config.BoolValue{Name: []string{"tty", "t"}},
+	}
+
+	// var fugufileConf = []config.Value{
+	// 	&config.StringValue{Name: []string{"name"}},
+	// }
+
+	// read fugufile
+	data, err := ioutil.ReadFile(fugufilePath)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	err = MergeConfig(data, args, label, &conf)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// only continue if container name is given
+	containerName := config.Get(conf, "name")
+	if containerName == nil {
+		fmt.Println("Please specify a container name.")
+		os.Exit(1)
+	}
+
+	// force some vars
+	config.Set(&conf, "interactive", true)
+	config.Set(&conf, "tty", true)
+
+	// finally build args
+	// a := BuildRunArgs(&conf)
+
+	dockerName := ""
+	dockerCommand := ""
+	dockerArgs := make([]string, 0)
+	dockerExecs := make([]string, 0)
+
+	a := make([]string, 0)
+	for _, c := range conf {
+		if c.Names()[0] == "name" {
+			dockerName = c.Get().(string)
+		} else if c.Names()[0] == "command" {
+			dockerCommand = c.Get().(string)
+		} else if c.Names()[0] == "args" {
+			dockerArgs = c.Get().([]string)
+		} else if c.Names()[0] == "exec" {
+			dockerExecs = c.Get().([]string)
+		} else {
+			v := c.Arg()
+			if len(v) > 0 {
+				a = append(a, c.Arg()...)
+			}
+		}
+	}
+
+	if dockerName != "" {
+		// check if dockerName != "" although this should never happen!
+		a = append(a, dockerName)
+	}
+
+	for _, dE := range dockerExecs {
+
+		a2 := a
+
+		if dockerCommand != "" || len(dockerArgs) > 0 {
+			if dockerCommand != "" {
+				a2 = append(a2, dockerCommand)
+			}
+
+			a2 = append(a2, dockerArgs...)
+		} else {
+			a2 = append(a2, strings.Split(dE, " ")...)
+		}
+
+		a2 = append(a2, "")
+		copy(a2[1:], a2[0:])
+		a2[0] = "exec"
+
+		fmt.Println("docker", strings.Join(a2, " "))
+		cmd := exec.Command("docker", a2...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		cmd.Run()
+	}
+
+}
+
+func CmdDestroy(fugufilePath string, args []string, label string) {
 	var fugufileConf = []config.Value{
 		&config.StringValue{Name: []string{"name"}},
 	}

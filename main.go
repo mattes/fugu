@@ -34,7 +34,7 @@ func main() {
 	command := args[1]
 
 	// check commands upfront
-	if command != "run" && command != "build" && command != "destroy" {
+	if command != "run" && command != "build" && command != "destroy" && command != "exec" {
 		printUsage()
 		os.Exit(1)
 	}
@@ -95,6 +95,8 @@ func main() {
 		cli.CmdRun(fugufilePath, dockerArgs, label)
 	case "build":
 		cli.CmdBuild(fugufilePath, dockerArgs, label)
+	case "exec":
+		cli.CmdExec(fugufilePath, dockerArgs, label)
 	case "destroy":
 		cli.CmdDestroy(fugufilePath, dockerArgs, label)
 	}
@@ -106,6 +108,8 @@ func printUsage() {
 commands:
   run         wraps docker run
   build       wraps docker build
+  exec       	wraps docker exec
+  destroy     destroys container
 
 See https://github.com/mattes/fugu/blob/v` + version.Version + `/DOC.md for more help.`)
 }
