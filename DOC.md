@@ -67,6 +67,20 @@ fugu build [fugufile] [label] [docker-options]
  * you can use `--path` to build the image from source code at path. defaults to current directoy.
 ```
 
+## fugu exec
+
+this executes docker exec
+
+```
+fugu exec [fugufile] [label] [--exec]
+
+ * fugufile, see above
+ * label, see above
+ * no further docker options are allowed
+ * defaults to --interactive=true and --tty=true
+ * requires that name variable is set
+```
+
 ## fugu destroy
 
 this executes docker rm -f 
