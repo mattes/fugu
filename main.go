@@ -108,7 +108,7 @@ func printUsage() {
 commands:
   run         wraps docker run
   build       wraps docker build
-  exec       	wraps docker exec
+  exec        wraps docker exec
   destroy     destroys container
 
 See https://github.com/mattes/fugu/blob/v` + version.Version + `/DOC.md for more help.`)
