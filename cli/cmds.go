@@ -99,11 +99,11 @@ func CmdRun(fugufilePath string, args []string, label string) {
 
 	a = append(a, "")
 	copy(a[1:], a[0:])
-	a[0] = "run"
+	a[0] = "docker run"
 
-	fmt.Println("docker", strings.Join(a, " "))
+	fmt.Println(strings.Join(a, " "))
 
-	cmd := exec.Command("docker", a...)
+	cmd := exec.Command("sh", "-c", strings.Join(a, " "))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
@@ -185,11 +185,11 @@ func CmdBuild(fugufilePath string, args []string, label string) {
 
 	a = append(a, "")
 	copy(a[1:], a[0:])
-	a[0] = "build"
+	a[0] = "docker build"
 
-	fmt.Println("docker", strings.Join(a, " "))
+	fmt.Println(strings.Join(a, " "))
 
-	cmd := exec.Command("docker", a...)
+	cmd := exec.Command("sh", "-c", strings.Join(a, " "))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
@@ -225,13 +225,6 @@ func CmdExec(fugufilePath string, args []string, label string) {
 		os.Exit(1)
 	}
 
-	// only continue if container name is given
-	containerName := config.Get(conf, "name")
-	if containerName == nil {
-		fmt.Println("Please specify a container name.")
-		os.Exit(1)
-	}
-
 	// force some vars
 	config.Set(&conf, "interactive", true)
 	config.Set(&conf, "tty", true)
@@ -262,37 +255,47 @@ func CmdExec(fugufilePath string, args []string, label string) {
 		}
 	}
 
-	if dockerName != "" {
-		// check if dockerName != "" although this should never happen!
-		a = append(a, dockerName)
+	if dockerName == "" {
+		fmt.Println("Please specify a container name.")
+		os.Exit(1)
 	}
 
-	for _, dE := range dockerExecs {
+	a = append(a, dockerName)
 
-		a2 := a
+	if dockerCommand != "" {
+		a = append(a, dockerCommand)
+		a = append(a, dockerArgs...)
 
-		if dockerCommand != "" || len(dockerArgs) > 0 {
-			if dockerCommand != "" {
-				a2 = append(a2, dockerCommand)
-			}
+		a = append(a, "")
+		copy(a[1:], a[0:])
+		a[0] = "docker exec"
 
-			a2 = append(a2, dockerArgs...)
-		} else {
-			a2 = append(a2, strings.Split(dE, " ")...)
-		}
+		fmt.Println(strings.Join(a, " "))
 
-		a2 = append(a2, "")
-		copy(a2[1:], a2[0:])
-		a2[0] = "exec"
-
-		fmt.Println("docker", strings.Join(a2, " "))
-		cmd := exec.Command("docker", a2...)
+		cmd := exec.Command("sh", "-c", strings.Join(a, " "))
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
 		cmd.Run()
-	}
 
+	} else {
+		for _, dE := range dockerExecs {
+			a2 := a
+			a2 = append(a2, strings.Split(dE, " ")...)
+
+			a2 = append(a2, "")
+			copy(a2[1:], a2[0:])
+			a2[0] = "docker exec"
+
+			fmt.Println(strings.Join(a2, " "))
+
+			cmd := exec.Command("sh", "-c", strings.Join(a2, " "))
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			cmd.Stdin = os.Stdin
+			cmd.Run()
+		}
+	}
 }
 
 func CmdDestroy(fugufilePath string, args []string, label string) {
@@ -322,9 +325,9 @@ func CmdDestroy(fugufilePath string, args []string, label string) {
 	}
 
 	a := make([]string, 0)
-	a = append(a, []string{"rm", "-f"}...)
+	a = append(a, []string{"docker", "rm", "-f"}...)
 
-	dockerName := fugufileConf[0].Get()
+	dockerName := config.Get(fugufileConf, "name").Get()
 	if dockerName != nil && dockerName != "" {
 		a = append(a, dockerName.(string))
 	} else {
@@ -332,9 +335,9 @@ func CmdDestroy(fugufilePath string, args []string, label string) {
 		os.Exit(1)
 	}
 
-	fmt.Println("docker", strings.Join(a, " "))
+	fmt.Println(strings.Join(a, " "))
 
-	cmd := exec.Command("docker", a...)
+	cmd := exec.Command("sh", "-c", strings.Join(a, " "))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
