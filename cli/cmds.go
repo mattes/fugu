@@ -172,6 +172,8 @@ func CmdBuild(fugufilePath string, args []string, label string) {
 	if dockerTag == "" {
 		dockerImage := fugufileConf[0].Get().(string)
 		a = append(a, fmt.Sprintf(`--tag="%v"`, dockerImage))
+	} else {
+		a = append(a, fmt.Sprintf(`--tag="%v"`, dockerTag))
 	}
 
 	sort.Sort(sort.StringSlice(a))
