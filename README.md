@@ -32,13 +32,13 @@ All docker options are supported. See __[full documentation here](DOC.md)__.
 
 ```bash
 # Mac OS X
-curl -L https://github.com/mattes/fugu/releases/download/v0.1.6/fugu.v0.1.6.darwin.x86_64.tar.gz | tar xvz
-mv fugu.v0.1.6.darwin.x86_64 /usr/local/bin/fugu
+curl -L https://github.com/mattes/fugu/releases/download/v0.1.7/fugu.v0.1.7.darwin.x86_64.tar.gz | tar xvz
+mv fugu.v0.1.7.darwin.x86_64 /usr/local/bin/fugu
 chmod +x /usr/local/bin/fugu
 
 # Linux
-curl -L https://github.com/mattes/fugu/releases/download/v0.1.6/fugu.v0.1.6.linux.x86_64.tar.gz | tar xvz
-mv fugu.v0.1.6.linux.x86_64 /usr/local/bin/fugu
+curl -L https://github.com/mattes/fugu/releases/download/v0.1.7/fugu.v0.1.7.linux.x86_64.tar.gz | tar xvz
+mv fugu.v0.1.7.linux.x86_64 /usr/local/bin/fugu
 chmod +x /usr/local/bin/fugu
 
 # from source, if you have GO installed
