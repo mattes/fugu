@@ -107,7 +107,9 @@ func CmdRun(fugufilePath string, args []string, label string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		os.Exit(1)
+	}
 }
 
 func CmdBuild(fugufilePath string, args []string, label string) {
@@ -195,7 +197,9 @@ func CmdBuild(fugufilePath string, args []string, label string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		os.Exit(1)
+	}
 }
 
 func CmdExec(fugufilePath string, args []string, label string) {
@@ -278,7 +282,9 @@ func CmdExec(fugufilePath string, args []string, label string) {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
-		cmd.Run()
+		if err := cmd.Run(); err != nil {
+			os.Exit(1)
+		}
 
 	} else {
 		for _, dE := range dockerExecs {
@@ -295,7 +301,9 @@ func CmdExec(fugufilePath string, args []string, label string) {
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			cmd.Stdin = os.Stdin
-			cmd.Run()
+			if err := cmd.Run(); err != nil {
+				os.Exit(1)
+			}
 		}
 	}
 }
@@ -343,5 +351,7 @@ func CmdDestroy(fugufilePath string, args []string, label string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		os.Exit(1)
+	}
 }
