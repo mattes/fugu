@@ -36,6 +36,8 @@ func CmdRun(fugufilePath string, args []string, label string) {
 		&config.StringValue{Name: []string{"entrypoint"}},
 		&config.StringValue{Name: []string{"hostname", "h"}},
 		&config.StringValue{Name: []string{"memory", "m"}},
+		&config.StringValue{Name: []string{"memory-swap"}},
+		&config.StringValue{Name: []string{"mac-address"}},
 		&config.StringValue{Name: []string{"user", "u"}},
 		&config.StringValue{Name: []string{"workdir", "w"}},
 		&config.Int64Value{Name: []string{"cpu-shares", "c"}},
@@ -127,9 +129,11 @@ func CmdBuild(fugufilePath string, args []string, label string) {
 
 		&config.BoolValue{Name: []string{"force-rm"}},
 		&config.BoolValue{Name: []string{"no-cache"}},
+		&config.BoolValue{Name: []string{"pull"}},
 		&config.BoolValue{Name: []string{"quit", "q"}},
 		&config.BoolValue{Name: []string{"rm"}},
 		&config.StringValue{Name: []string{"tag", "t"}},
+		&config.StringValue{Name: []string{"file", "f"}},
 	}
 
 	// read fugufile
