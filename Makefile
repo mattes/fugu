@@ -18,6 +18,6 @@ clean:
 	rm -r build/*
 
 test:
-	go test ./...
+	godep go test ./...
 
 .PHONY: build clean test
