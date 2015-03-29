@@ -62,7 +62,7 @@ possible docker container combination.
 
 ---
 
-[![Build Status](https://travis-ci.org/mattes/fugu.svg?branch=master)](https://travis-ci.org/mattes/fugu)
+[![Build Status](https://travis-ci.org/mattes/fugu.svg?branch=v0)](https://travis-ci.org/mattes/fugu)
 [![GoDoc](https://godoc.org/github.com/mattes/fugu?status.svg)](https://godoc.org/github.com/mattes/fugu)
 
 
