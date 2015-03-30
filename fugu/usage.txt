@@ -9,7 +9,7 @@ Commands:
     destroy      Kil a running container and remove it
     push         Push an image or a repository to the registry
     pull         Pull an image or a repository from the registry
-    images       Show all images in the registry
+    images       List images (from remote registry)
     show-data    Show aggregated data for label
     show-labels  Show all labels
     help         Show help
@@ -198,10 +198,14 @@ Example source options:
 
 Usage: fugu images [REGISTRY]
 
-Show all images in the registry
+List images (from remote registry)
 
 Fugu options:
-  --registry=""      URL of the registry
+  --file="~/.dockercfg"     Read credentials from this file
+  --password=""             Use this password
+  --password-stdin=false    Ask for password
+  --registry=""             URL of the registry
+  --user=""                 Use this username
 
 Example source options:
   --source=file://config.yml
