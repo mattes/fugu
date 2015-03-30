@@ -1,0 +1,6 @@
+label1:
+  image: redis
+  name: my-redis
+
+label2:
+  name: another-ubuntu

@@ -1,71 +1,76 @@
-<img src="fugu.png" height="200">
+<img src="fugu.png" height="160">
 
 # What is fugu?
 
- * fugu is a wrapper around docker run & build commands.
- * fugu loads arguments from a fugu.yml file and 
-   merges these arguments with cli options.
- * fugu is NOT an orchestration tool like [fig](https://github.com/docker/fig). 
+ * fugu is a convenience wrapper around docker commands
+ * fugu loads config from a fugu.yml file and 
+   merges these arguments with command line flags.
 
- 
 __Example__
-
 
 ```yml
 # fugu.yml (maybe stored next to Dockerfile)
-image:  mattes/hello-world-nginx # mandatory
-name:   hello-world-nginx
-detach: true
+image:  ubuntu
+name:   my-ubuntu
 publish:
   - 8080:80
 ```
 
 ```bash
-$ fugu run -e VERY=nice # runs ...
-docker run --detach --name="hello-world-nginx" --env="VERY=nice" --publish="8080:80" mattes/hello-world-nginx
+$ fugu run --detach # runs ...
+docker run --detach --name=my-ubuntu --publish=8080:80 ubuntu
 ```
 
-All docker options are supported. See __[full documentation here](DOC.md)__.
+Fugu commands include: ``build``, ``run``, ``exec``, ``destroy``, 
+``push``, ``pull``, ``images``.
 
+__[All commands and their usage](https://github.com/mattes/fugu/blob/v1/fugu/usage.txt)__
+and [example fugu.yml files](https://github.com/mattes/fugu/tree/v1/examples).
 
 # Installation
 
 ```bash
 # Mac OS X
-curl -L https://github.com/mattes/fugu/releases/download/v0.1.8/fugu.v0.1.8.darwin.x86_64.tar.gz | tar xvz
-mv fugu.v0.1.8.darwin.x86_64 /usr/local/bin/fugu
+curl -L https://github.com/mattes/fugu/releases/download/v1.0.0/fugu.v1.0.0.darwin.x86_64.tar.gz | tar xvz
+mv fugu.v1.0.0.darwin.x86_64 /usr/local/bin/fugu
 chmod +x /usr/local/bin/fugu
 
 # Linux
-curl -L https://github.com/mattes/fugu/releases/download/v0.1.8/fugu.v0.1.8.linux.x86_64.tar.gz | tar xvz
-mv fugu.v0.1.8.linux.x86_64 /usr/local/bin/fugu
+curl -L https://github.com/mattes/fugu/releases/download/v1.0.0/fugu.v1.0.0.linux.x86_64.tar.gz | tar xvz
+mv fugu.v1.0.0.linux.x86_64 /usr/local/bin/fugu
 chmod +x /usr/local/bin/fugu
-
-# from source, if you have GO installed
-go get github.com/mattes/fugu
 ```
-
 
 # Why fugu?
 
-We are working on [developermail.io](https://developermail.io) atm. 
+We created [developermail.io - A mailbox built for developers](https://developermail.io).
 The project uses a microservice architecture and consists of lots of docker images. 
 During development a docker container is built, run and destroyed quite often.
-With fugu we can speed up this workflow, because all ``docker run`` arguments
-are stored in the ``fugu.yml`` file. We also used to put ``docker run`` statements 
+With fugu we can speed up this workflow, because all ``docker`` options
+are stored in a ``fugu.yml`` file. 
+We also used to put ``docker run`` statements 
 in ``README.md``, but the format wasn't consistent. Now ``fugu.yml`` is our second point of contact 
-(after the ``Dockerfile`` itself), when looking at a new docker image somebody else created.
-We didn't want to use fig, because the set of containers we run during
-development changes often and we didn't want to have one ``fig.yml`` for every
-possible docker container combination.
+(after the ``Dockerfile`` itself), when looking at a docker image.
+
+
+## How is this different from docker-compose/ fig?
+
+While [docker-compose](https://docs.docker.com/compose) (originated from ``fig``) 
+focuses on the definition and orchestration of complex application environments, 
+fugu focuses on one single docker container/ docker image.
+
+## Changelog
+
+Find the changelog and breaking changes here:
+https://github.com/mattes/fugu/releases
 
 
 ---
 
-[![Build Status](https://travis-ci.org/mattes/fugu.svg?branch=master)](https://travis-ci.org/mattes/fugu)
-[![GoDoc](https://godoc.org/github.com/mattes/fugu?status.svg)](https://godoc.org/github.com/mattes/fugu)
+[![Build Status](https://travis-ci.org/mattes/fugu.svg?branch=v1)](https://travis-ci.org/mattes/fugu)
 
+Fugu is built on top of [go-collect](https://github.com/mattes/go-collect).
 
 ### Credits
 
-Thanks to [Thiago Lifter](http://www.thiagolifter.com.br) for his nice fugu fish logo.
+Thanks to [Thiago Lifter](https://dribbble.com/golifter) for his nice fugu fish logo.

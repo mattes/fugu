@@ -1,4 +1,4 @@
-fugu
 fugu.yml
 build
-Dockerfile
+tmp
+/fugu/fugu

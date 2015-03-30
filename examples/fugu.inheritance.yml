@@ -1,0 +1,16 @@
+label1:
+  image: redis
+  name: my-redis
+  detach: true
+  env:
+    - a=b
+
+label2:
+  <<: label1
+  name: another-ubuntu  # overwrites label1.name
+  env:                  # completely overwrites label1.env
+    - c=d
+    - e=f
+  tty: true
+  # image: redis
+  # detach: true
