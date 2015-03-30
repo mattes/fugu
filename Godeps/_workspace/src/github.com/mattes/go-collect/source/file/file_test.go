@@ -3,10 +3,13 @@ package file
 import (
 	"github.com/mattes/go-collect/data"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 )
 
 func TestParse(t *testing.T) {
+	os.Setenv("SOME_RANDOM_GLOBAL_TEST_VAR_123", "foobar")
+
 	var tests = []struct {
 		testDesc string
 		body     string
@@ -25,12 +28,28 @@ func TestParse(t *testing.T) {
         - bar
         - hu
       `,
-			label: "",
+			label: "default",
 
 			data: data.ToData(map[string][]string{
 				"image": []string{"test"},
 				"name":  []string{"foobar"},
 				"foo":   []string{"bar", "hu"},
+			}),
+			labels: []string{"default"},
+			err:    nil,
+		},
+
+		{
+			testDesc: "replace ENV vars",
+			body: `
+      image: $SOME_RANDOM_GLOBAL_TEST_VAR_123
+      name: rab
+      `,
+			label: "default",
+
+			data: data.ToData(map[string][]string{
+				"image": []string{"foobar"},
+				"name":  []string{"rab"},
 			}),
 			labels: []string{"default"},
 			err:    nil,
@@ -65,7 +84,7 @@ func TestParse(t *testing.T) {
       label5:
         image: test1
       `,
-			label: "",
+			label: "label",
 			data: data.ToData(map[string][]string{
 				"image": []string{"test"},
 				"name":  []string{"foobar"},
@@ -86,7 +105,7 @@ func TestParse(t *testing.T) {
 
       another-label: ~
       `,
-			label: "",
+			label: "default",
 			data: data.ToData(map[string][]string{
 				"image": []string{"use-this"},
 			}),
@@ -166,11 +185,9 @@ func TestParse(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		if tt.testDesc != "inheritance" {
-			continue
-		}
 		f := File{}
 		f.body = []byte(tt.body)
+		f.label = tt.label
 		err := f.parse()
 		assert.Equal(t, tt.err, err, tt.testDesc)
 		if err == nil {

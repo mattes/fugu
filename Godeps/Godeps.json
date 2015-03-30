@@ -185,7 +185,7 @@
 		},
 		{
 			"ImportPath": "github.com/mattes/go-collect",
-			"Rev": "4b761a1a1181bc57db4ec7c225d83adaf05ee507"
+			"Rev": "6427a3b5d86b72865561fbb67721a8fedd3a7bfe"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-isatty",

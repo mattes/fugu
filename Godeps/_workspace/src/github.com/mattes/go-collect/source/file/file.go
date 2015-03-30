@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 )
@@ -89,6 +90,9 @@ func (s *File) readFile() error {
 
 // parse parses the file content into a yaml struct
 func (s *File) parse() error {
+
+	// inject env vars
+	s.body = injectEnvVars(s.body)
 
 	// Parse '<<:' to '<:' so we don't trigger the internal
 	// yaml pkg inheritance parsing. it will fail because of
@@ -259,4 +263,12 @@ func interfaceSliceToStringSlice(in []interface{}) []string {
 		out = append(out, fmt.Sprintf("%v", v))
 	}
 	return out
+}
+
+// injectEnvVars replaces $ENV vars with their actual value
+func injectEnvVars(value []byte) []byte {
+	envVarRegex := regexp.MustCompile(`\$[a-zA-Z_]+[a-zA-Z0-9_]*`)
+	return envVarRegex.ReplaceAllFunc(value, func(match []byte) []byte {
+		return []byte(os.Getenv(string(bytes.TrimPrefix(match, []byte("$")))))
+	})
 }
