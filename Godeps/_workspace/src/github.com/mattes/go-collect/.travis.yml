@@ -1,0 +1,11 @@
+language: go
+
+before_script:
+  - go get github.com/tools/godep
+
+script:
+  - make test
+
+go:
+  - 1.4
+  - tip
