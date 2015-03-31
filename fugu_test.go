@@ -297,15 +297,6 @@ func TestCommandExec(t *testing.T) {
 	}).Test(t)
 
 	(&DockerCommandTest{
-		testDesc: "plain exec",
-		command:  "exec",
-		dataIn:   data.New().Set("name", "foo"),
-		argsIn:   []string{},
-		strOut:   "docker exec --interactive --tty foo",
-		errOut:   nil,
-	}).Test(t)
-
-	(&DockerCommandTest{
 		testDesc: "allow overwrite interactive",
 		command:  "exec",
 		dataIn:   data.New().Set("name", "foo").SetFalse("interactive"),
