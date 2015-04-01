@@ -13,7 +13,7 @@ func init() {
 	FuguCommon.Bool([]string{"-dry-run"}, false, "Just print commands")
 
 	// Define FuguFlags["build"]
-	FuguFlags["build"] = flags.New("")
+	FuguFlags["build"] = flags.New("fugu")
 	FuguFlags["build"].String([]string{"-image"}, "", "Name of the image")
 	FuguFlags["build"].String([]string{"-path"}, "", "PATH")
 	FuguFlags["build"].String([]string{"-url"}, "", "URL")

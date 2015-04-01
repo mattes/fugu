@@ -17,7 +17,7 @@ import (
 )
 
 // DockerCommands return string that is always run
-var DockerCommands = make(map[string]func(p *data.Data, args []string) (str string, err error))
+var DockerCommands = make(map[string]func(c *collect.Collector, p *data.Data, args []string) (str string, err error))
 
 // Commands have more freedom and usually print to stdout/stderr directly
 var Commands = make(map[string]func(c *collect.Collector, p *data.Data, args []string) (err error))
@@ -33,7 +33,7 @@ var (
 
 func init() {
 
-	DockerCommands["build"] = func(p *data.Data, args []string) (str string, err error) {
+	DockerCommands["build"] = func(c *collect.Collector, p *data.Data, args []string) (str string, err error) {
 		if p.Get("image") == "" {
 			return "", ErrMissingImage
 		}
@@ -59,6 +59,7 @@ func init() {
 		if url := p.Get("url"); url != "" {
 			path = url
 		}
+
 		if len(args) == 1 {
 			path = args[0]
 		}
@@ -75,7 +76,7 @@ func init() {
 		return buildDockerStr("build", pf, path), nil
 	}
 
-	DockerCommands["run"] = func(p *data.Data, args []string) (str string, err error) {
+	DockerCommands["run"] = func(c *collect.Collector, p *data.Data, args []string) (str string, err error) {
 		if p.Get("image") == "" {
 			return "", ErrMissingImage
 		}
@@ -109,7 +110,7 @@ func init() {
 		return buildDockerStr("run", pf, nargs...), nil
 	}
 
-	DockerCommands["exec"] = func(p *data.Data, args []string) (str string, err error) {
+	DockerCommands["exec"] = func(c *collect.Collector, p *data.Data, args []string) (str string, err error) {
 		if p.Get("name") == "" {
 			return "", ErrMissingName
 		}
@@ -153,7 +154,7 @@ func init() {
 		return buildDockerStr("exec", pf, nargs...), nil
 	}
 
-	DockerCommands["destroy"] = func(p *data.Data, args []string) (str string, err error) {
+	DockerCommands["destroy"] = func(c *collect.Collector, p *data.Data, args []string) (str string, err error) {
 		if p.Get("name") == "" {
 			return "", ErrMissingName
 		}
@@ -165,7 +166,7 @@ func init() {
 		return "docker rm -f " + p.Get("name"), nil
 	}
 
-	DockerCommands["push"] = func(p *data.Data, args []string) (str string, err error) {
+	DockerCommands["push"] = func(c *collect.Collector, p *data.Data, args []string) (str string, err error) {
 		if p.Get("image") == "" {
 			return "", ErrMissingImage
 		}
@@ -196,7 +197,7 @@ func init() {
 		return buildDockerStr("push", pf, image), nil
 	}
 
-	DockerCommands["pull"] = func(p *data.Data, args []string) (str string, err error) {
+	DockerCommands["pull"] = func(c *collect.Collector, p *data.Data, args []string) (str string, err error) {
 		if p.Get("image") == "" {
 			return "", ErrMissingImage
 		}

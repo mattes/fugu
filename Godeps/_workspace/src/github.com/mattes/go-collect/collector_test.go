@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/mattes/go-collect/data"
 	"github.com/mattes/go-collect/flags"
+	"github.com/mattes/go-collect/source/file"
 	"github.com/mattes/go-collect/source/urlquery"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -47,6 +48,7 @@ func TestParse(t *testing.T) {
 	f.String([]string{"-bar"}, "", "")
 
 	RegisterSource(&urlquery.UrlQuery{})
+	RegisterSource(&file.File{})
 
 	var tests = []struct {
 		testDesc      string
@@ -58,7 +60,7 @@ func TestParse(t *testing.T) {
 	}{
 		{
 			testDesc:      "simple",
-			args:          []string{"label", "--foo=bar"},
+			args:          []string{"--foo=bar"},
 			flags:         f,
 			d:             data.ToData(map[string][]string{"foo": []string{"bar"}}),
 			remainingArgs: []string{},
@@ -66,17 +68,33 @@ func TestParse(t *testing.T) {
 		},
 		{
 			testDesc:      "with remaining args",
-			args:          []string{"label", "--foo=bar", "."},
+			args:          []string{"--foo=bar", "."},
 			flags:         f,
 			d:             data.ToData(map[string][]string{"foo": []string{"bar"}}),
 			remainingArgs: []string{"."},
 			err:           nil,
 		},
 		{
+			testDesc:      "with label",
+			args:          []string{"label1", "--source=file://source/file/file.test.yml", "--foo=bar", "."},
+			flags:         f,
+			d:             data.ToData(map[string][]string{"foo": []string{"bar"}}),
+			remainingArgs: []string{"."},
+			err:           nil,
+		},
+		{
+			testDesc:      "with unknown label",
+			args:          []string{"label-unknown", "--source=file://source/file/file.test.yml", "--foo=bar", "."},
+			flags:         f,
+			d:             data.ToData(map[string][]string{"foo": []string{"bar"}}),
+			remainingArgs: []string{"label-unknown", "."},
+			err:           nil,
+		},
+		{
 			// foo: bar -> from args
 			// bar: foo -> from source
 			testDesc:      "with source",
-			args:          []string{"label", "--foo=bar", "--source=urlquery://foo=rab&bar=foo"},
+			args:          []string{"--foo=bar", "--source=urlquery://foo=rab&bar=foo"},
 			flags:         f,
 			d:             data.ToData(map[string][]string{"foo": []string{"bar"}, "bar": []string{"foo"}}),
 			remainingArgs: []string{},
@@ -86,7 +104,7 @@ func TestParse(t *testing.T) {
 			// foo: bar -> from args
 			// bar: oof -> from last source
 			testDesc:      "with multiple sources",
-			args:          []string{"label", "--foo=bar", "--source=urlquery://foo=rab&bar=foo", "--source=urlquery://foo=arb&bar=oof"},
+			args:          []string{"--foo=bar", "--source=urlquery://foo=rab&bar=foo", "--source=urlquery://foo=arb&bar=oof"},
 			flags:         f,
 			d:             data.ToData(map[string][]string{"foo": []string{"bar"}, "bar": []string{"oof"}}),
 			remainingArgs: []string{},
@@ -94,7 +112,7 @@ func TestParse(t *testing.T) {
 		},
 		{
 			testDesc:      "flag provided but not defined",
-			args:          []string{"label", "--foo=bar", "--bogus='option is not defined'"},
+			args:          []string{"--foo=bar", "--bogus='option is not defined'"},
 			flags:         f,
 			d:             data.New(),
 			remainingArgs: []string{},
@@ -102,7 +120,7 @@ func TestParse(t *testing.T) {
 		},
 		{
 			testDesc:      "source gets defined automatically",
-			args:          []string{"label", "--foo=bar", "--source=urlquery://"},
+			args:          []string{"--foo=bar", "--source=urlquery://"},
 			flags:         f,
 			d:             data.ToData(map[string][]string{"foo": []string{"bar"}}),
 			remainingArgs: []string{},
@@ -110,7 +128,7 @@ func TestParse(t *testing.T) {
 		},
 		{
 			testDesc:      "fail on invalid source scheme",
-			args:          []string{"label", "--foo=bar", "--source=bogus://"},
+			args:          []string{"--foo=bar", "--source=bogus://"},
 			flags:         f,
 			d:             data.New(),
 			remainingArgs: []string{},

@@ -44,9 +44,10 @@ func New() *Collector {
 
 func (c *Collector) Parse(args []string, f ...*flags.Flags) (p *data.Data, remainingArgs []string, err error) {
 	c.args = args
-	c.label = c.parseLabel()
 	c.AddFlags(f...)
 	combinedFlags := flags.New("")
+	tmpLabel := c.parseLabel()
+	isLabel := false
 
 	if !c.flagDefined("source") {
 		f := flags.New("")
@@ -73,9 +74,17 @@ func (c *Collector) Parse(args []string, f ...*flags.Flags) (p *data.Data, remai
 
 		// TODO do this async
 		u, _ := url.Parse(sarg)
-		p, err := s.Load(c.label, u)
+		p, err := s.Load(tmpLabel, u)
 		if err != nil {
 			return nil, nil, err
+		}
+
+		// check if tmpLabel is really a label
+		for _, l := range s.Labels() {
+			if l == tmpLabel {
+				isLabel = true
+				break
+			}
 		}
 
 		// merge data from Load
@@ -84,6 +93,14 @@ func (c *Collector) Parse(args []string, f ...*flags.Flags) (p *data.Data, remai
 
 	// overwrite with args data
 	sourceData.Merge(argsData)
+
+	if isLabel {
+		c.label = tmpLabel
+	} else {
+		if tmpLabel != "" {
+			c.args = append([]string{tmpLabel}, c.args...)
+		}
+	}
 
 	return sourceData, c.args, nil
 }

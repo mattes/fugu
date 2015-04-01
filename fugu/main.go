@@ -104,7 +104,7 @@ func dockerCommand(c *collect.Collector, command string, args []string) {
 		os.Exit(0)
 	}
 
-	cmdStr, err := fugu.DockerCommands[command](data, remainingArgs)
+	cmdStr, err := fugu.DockerCommands[command](c, data, remainingArgs)
 	if err != nil {
 		fuguErrExit(err)
 	}
