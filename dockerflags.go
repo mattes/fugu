@@ -73,8 +73,8 @@ func init() {
 
 	// Define DockerFlags["exec"]
 	DockerFlags["exec"] = flags.New("docker")
-	DockerFlags["exec"].Bool([]string{"i", "-interactive"}, true, "Keep STDIN open even if not attached (!)")
-	DockerFlags["exec"].Bool([]string{"t", "-tty"}, true, "Allocate a pseudo-TTY (!)")
+	DockerFlags["exec"].Bool([]string{"i", "-interactive"}, false, "Keep STDIN open even if not attached")
+	DockerFlags["exec"].Bool([]string{"t", "-tty"}, false, "Allocate a pseudo-TTY")
 	DockerFlags["exec"].Bool([]string{"d", "-detach"}, false, "Detached mode: run command in the background")
 
 	// Define DockerFlags["destroy"]
