@@ -105,7 +105,8 @@ func (s *File) parse() error {
 	spl := bytes.Split(s.body, []byte("\n"))
 	for i := 0; i < len(spl); i++ {
 		spl[i] = reRepl.ReplaceAllFunc(spl[i], func(in []byte) []byte {
-			return bytes.Replace(in, []byte("<<:"), []byte("<:"), 1)
+			// whitespace to replacement in order to allow <<:label, instead of <<: label
+			return bytes.Replace(in, []byte("<<:"), []byte("<: "), 1)
 		})
 	}
 	s.body = bytes.Join(spl, []byte("\n"))
@@ -119,6 +120,7 @@ func (s *File) parse() error {
 		if err := yaml.Unmarshal(s.body, &yamlNoLabels); err != nil {
 			return ErrYamlParsing
 		}
+
 		yamlWithLabels = map[string]map[string]interface{}{
 			"default": yamlNoLabels,
 		}

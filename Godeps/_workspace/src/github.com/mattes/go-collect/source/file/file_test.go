@@ -182,6 +182,41 @@ func TestParse(t *testing.T) {
 			labels: []string{"label1", "label3", "label2", "label4"},
 			err:    nil,
 		},
+
+		{
+			testDesc: "inheritance declaration",
+			body: `
+      label1:
+        foo: bar 
+
+      label2: 
+        <<: label1
+
+      label3: 
+        <<:label1
+      `,
+			label: "label1",
+
+			data: data.ToData(map[string][]string{
+				"foo": []string{"bar"},
+			}),
+			labels: []string{"label1", "label2", "label3"},
+			err:    nil,
+		},
+
+		{
+			testDesc: "invalid variable foo:bar",
+			body: `
+      label1:
+        foo:bar # this is a problem, because it means key:key
+        rab: foo
+      `,
+			label: "label1",
+
+			data:   data.New(),
+			labels: []string{},
+			err:    ErrYamlParsing,
+		},
 	}
 
 	for _, tt := range tests {
