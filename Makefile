@@ -35,6 +35,8 @@ usage-file:
 	echo "\n\n------------------------------------------\n\n" >> fugu/usage.txt
 	(cd fugu && ./fugu help exec >> usage.txt 2>&1)
 	echo "\n\n------------------------------------------\n\n" >> fugu/usage.txt
+	(cd fugu && ./fugu help shell >> usage.txt 2>&1)
+	echo "\n\n------------------------------------------\n\n" >> fugu/usage.txt
 	(cd fugu && ./fugu help destroy >> usage.txt 2>&1)
 	echo "\n\n------------------------------------------\n\n" >> fugu/usage.txt
 	(cd fugu && ./fugu help push >> usage.txt 2>&1)

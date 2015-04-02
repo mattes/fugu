@@ -170,7 +170,7 @@ func TestCommandBuild(t *testing.T) {
 	}).Test(t)
 
 	(&DockerCommandTest{
-		testDesc: "invalid number of args (no label)",
+		testDesc: "build: invalid number of args (no label)",
 		command:  "build",
 		argsIn:   []string{"--image=foo", "pathOrUrl", "bogus"},
 		strOut:   "",
@@ -178,7 +178,7 @@ func TestCommandBuild(t *testing.T) {
 	}).Test(t)
 
 	(&DockerCommandTest{
-		testDesc: "invalid number of args (with label label)",
+		testDesc: "build: invalid number of args (with label label)",
 		command:  "build",
 		argsIn:   []string{"label1", "--image=foo", "--source=file://examples/fugu.labels.yml", "pathOrUrl", "bogus"},
 		strOut:   "",
@@ -337,7 +337,7 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "plain exec",
 		command:  "exec",
 		argsIn:   []string{"--name=foo"},
-		strOut:   "docker exec --interactive --tty foo",
+		strOut:   "docker exec foo",
 		errOut:   nil,
 	}).Test(t)
 
@@ -345,7 +345,7 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "plain exec with label",
 		command:  "exec",
 		argsIn:   []string{"label1", "--source=file://examples/fugu.labels.yml"},
-		strOut:   "docker exec --interactive --tty my-redis",
+		strOut:   "docker exec my-redis",
 		errOut:   nil,
 	}).Test(t)
 
@@ -361,7 +361,7 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "get docker command from flag",
 		command:  "exec",
 		argsIn:   []string{"--name=foo", "--command=cmd"},
-		strOut:   "docker exec --interactive --tty foo cmd",
+		strOut:   "docker exec foo cmd",
 		errOut:   nil,
 	}).Test(t)
 
@@ -369,7 +369,7 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "get docker command from args",
 		command:  "exec",
 		argsIn:   []string{"--name=foo", "cmd"},
-		strOut:   "docker exec --interactive --tty foo cmd",
+		strOut:   "docker exec foo cmd",
 		errOut:   nil,
 	}).Test(t)
 
@@ -377,7 +377,7 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "docker command is given via args and flags",
 		command:  "exec",
 		argsIn:   []string{"--name=foo", "--command=cmdflag", "cmdarg"},
-		strOut:   "docker exec --interactive --tty foo cmdarg",
+		strOut:   "docker exec foo cmdarg",
 		errOut:   nil,
 	}).Test(t)
 
@@ -385,7 +385,7 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "get docker args from flag",
 		command:  "exec",
 		argsIn:   []string{"--name=foo", "--arg=a", "--arg=b"},
-		strOut:   "docker exec --interactive --tty foo a b",
+		strOut:   "docker exec foo a b",
 		errOut:   nil,
 	}).Test(t)
 
@@ -393,7 +393,7 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "get docker args from args",
 		command:  "exec",
 		argsIn:   []string{"--name=foo", "cmd", "a", "b"},
-		strOut:   "docker exec --interactive --tty foo cmd a b",
+		strOut:   "docker exec foo cmd a b",
 		errOut:   nil,
 	}).Test(t)
 
@@ -401,7 +401,7 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "docker args is given via args and flags",
 		command:  "exec",
 		argsIn:   []string{"--name=foo", "--arg=c", "--arg=d", "cmd", "a", "b"},
-		strOut:   "docker exec --interactive --tty foo cmd a b",
+		strOut:   "docker exec foo cmd a b",
 		errOut:   nil,
 	}).Test(t)
 
@@ -409,7 +409,7 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "command given via args, args given via flags",
 		command:  "exec",
 		argsIn:   []string{"--name=foo", "--arg=a", "--arg=b", "cmd"},
-		strOut:   "docker exec --interactive --tty foo cmd a b",
+		strOut:   "docker exec foo cmd a b",
 		errOut:   nil,
 	}).Test(t)
 
@@ -417,7 +417,7 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "command given via flag, args given via args",
 		command:  "exec",
 		argsIn:   []string{"--name=foo", "--command=cmd", "a", "b"},
-		strOut:   "docker exec --interactive --tty foo a b",
+		strOut:   "docker exec foo a b",
 		errOut:   nil,
 	}).Test(t)
 
@@ -425,7 +425,7 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "args given via args and flags",
 		command:  "exec",
 		argsIn:   []string{"--name=foo", "--arg=c", "--arg=d", "--arg=e", "a", "b"},
-		strOut:   "docker exec --interactive --tty foo a b",
+		strOut:   "docker exec foo a b",
 		errOut:   nil,
 	}).Test(t)
 
@@ -433,7 +433,41 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "args given via args and flags (with label)",
 		command:  "exec",
 		argsIn:   []string{"label1", "--source=file://examples/fugu.labels.yml", "--arg=c", "--arg=d", "--arg=e", "a", "b"},
-		strOut:   "docker exec --interactive --tty my-redis a b",
+		strOut:   "docker exec my-redis a b",
+		errOut:   nil,
+	}).Test(t)
+}
+
+func TestCommandShell(t *testing.T) {
+	(&DockerCommandTest{
+		testDesc: "name is missing",
+		command:  "shell",
+		argsIn:   []string{},
+		strOut:   "",
+		errOut:   ErrMissingName,
+	}).Test(t)
+
+	(&DockerCommandTest{
+		testDesc: "plain shell",
+		command:  "shell",
+		argsIn:   []string{"--name=foo"},
+		strOut:   "docker exec --detach=false --interactive --tty foo /bin/bash",
+		errOut:   nil,
+	}).Test(t)
+
+	(&DockerCommandTest{
+		testDesc: "override shell",
+		command:  "shell",
+		argsIn:   []string{"--name=foo", "--shell=/bin/sh"},
+		strOut:   "docker exec --detach=false --interactive --tty foo /bin/sh",
+		errOut:   nil,
+	}).Test(t)
+
+	(&DockerCommandTest{
+		testDesc: "plain shell with label",
+		command:  "shell",
+		argsIn:   []string{"label1", "--source=file://examples/fugu.labels.yml"},
+		strOut:   "docker exec --detach=false --interactive --tty my-redis /bin/bash",
 		errOut:   nil,
 	}).Test(t)
 }
@@ -472,7 +506,7 @@ func TestCommandDestroy(t *testing.T) {
 	}).Test(t)
 
 	(&DockerCommandTest{
-		testDesc: "invalid number of args",
+		testDesc: "destroy: invalid number of args",
 		command:  "destroy",
 		argsIn:   []string{"--name=foo", "bogus"},
 		strOut:   "",
@@ -530,7 +564,7 @@ func TestCommandPush(t *testing.T) {
 	}).Test(t)
 
 	(&DockerCommandTest{
-		testDesc: "invalid number of args",
+		testDesc: "push: invalid number of args",
 		command:  "push",
 		argsIn:   []string{"--image=foo", "tag", "bogus"},
 		strOut:   "",
@@ -538,7 +572,7 @@ func TestCommandPush(t *testing.T) {
 	}).Test(t)
 
 	(&DockerCommandTest{
-		testDesc: "invalid number of args with label",
+		testDesc: "push: invalid number of args with label",
 		command:  "push",
 		argsIn:   []string{"label1", "--source=file://examples/fugu.labels.yml", "tag", "bogus"},
 		strOut:   "",
@@ -596,7 +630,7 @@ func TestCommandPull(t *testing.T) {
 	}).Test(t)
 
 	(&DockerCommandTest{
-		testDesc: "invalid number of args",
+		testDesc: "pull: invalid number of args",
 		command:  "pull",
 		argsIn:   []string{"--image=foo", "tag", "bogus"},
 		strOut:   "",
@@ -614,7 +648,7 @@ func TestShowData(t *testing.T) {
 	}).Test(t)
 
 	(&CommandTest{
-		testDesc:       "invalid number of args",
+		testDesc:       "show-data: invalid number of args",
 		command:        "show-data",
 		argsIn:         []string{"label1", "bogus", "--source=file://examples/fugu.labels.yml"},
 		errOut:         ErrTooManyArgs,
@@ -622,10 +656,10 @@ func TestShowData(t *testing.T) {
 	}).Test(t)
 
 	(&CommandTest{
-		testDesc:       "no output",
+		testDesc:       "show-data no output",
 		command:        "show-data",
 		argsIn:         []string{"label3", "--source=file://examples/fugu.labels.yml"},
-		errOut:         nil,
+		errOut:         ErrUnknownLabel,
 		stdoutContains: []string{},
 	}).Test(t)
 }
@@ -640,7 +674,7 @@ func TestShowLabels(t *testing.T) {
 	}).Test(t)
 
 	(&CommandTest{
-		testDesc:       "invalid number of args",
+		testDesc:       "show-labels: invalid number of args",
 		command:        "show-labels",
 		argsIn:         []string{"bogus", "--source=file://examples/fugu.labels.yml"},
 		errOut:         ErrTooManyArgs,
@@ -648,7 +682,7 @@ func TestShowLabels(t *testing.T) {
 	}).Test(t)
 
 	(&CommandTest{
-		testDesc:       "no output",
+		testDesc:       "show-labels no output",
 		command:        "show-labels",
 		argsIn:         []string{""},
 		errOut:         nil,
@@ -666,7 +700,7 @@ func TestListImages(t *testing.T) {
 	}).Test(t)
 
 	(&CommandTest{
-		testDesc:       "invalid number of args",
+		testDesc:       "images: invalid number of args",
 		command:        "images",
 		argsIn:         []string{"registry", "bogus"},
 		errOut:         ErrTooManyArgs,

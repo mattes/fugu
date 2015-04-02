@@ -38,6 +38,15 @@ func usage(c *collect.Collector, command string) {
 		c.PrintUsage()
 		printSourceExampleUrls(c)
 
+	case "shell":
+		printMulti(`
+    Usage: fugu shell [LABEL] [OPTIONS]
+
+    Open a shell in a running container`)
+
+		c.PrintUsage()
+		printSourceExampleUrls(c)
+
 	case "destroy":
 		printMulti(`
     Usage: fugu destroy [LABEL]
@@ -102,6 +111,7 @@ func usage(c *collect.Collector, command string) {
         build        Build an image from a Dockerfile
         run          Run a command in a new container
         exec         Run a command in a running container
+        shell        Open a shell in a running container
         destroy      Kil a running container and remove it
         push         Push an image or a repository to the registry
         pull         Pull an image or a repository from the registry

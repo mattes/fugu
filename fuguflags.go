@@ -37,6 +37,13 @@ func init() {
 	FuguFlags["exec"] = flags.Merge(FuguCommon, FuguFlags["exec"])
 	FuguFlags["exec"].Name = "fugu"
 
+	// Define FuguFlags["shell"]
+	FuguFlags["shell"] = flags.New("fugu")
+	FuguFlags["shell"].String([]string{"-name"}, "", "Name of the container")
+	FuguFlags["shell"].String([]string{"-shell"}, "/bin/bash", "Path to shell")
+	FuguFlags["shell"] = flags.Merge(FuguCommon, FuguFlags["shell"])
+	FuguFlags["shell"].Name = "fugu"
+
 	// Define FuguFlags["destroy"]
 	FuguFlags["destroy"] = flags.New("fugu")
 	FuguFlags["destroy"].String([]string{"-name"}, "", "Name of the container to be destroyed")

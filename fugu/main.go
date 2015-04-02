@@ -69,6 +69,8 @@ func main() {
 		fallthrough
 	case "exec":
 		fallthrough
+	case "shell":
+		fallthrough
 	case "destroy":
 		fallthrough
 	case "push":

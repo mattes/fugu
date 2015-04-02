@@ -26,6 +26,7 @@ var (
 	ErrTooManyArgs   = errors.New("too many arguments given")
 	ErrMissingImage  = errors.New("image option is missing")
 	ErrMissingName   = errors.New("name option is missing")
+	ErrUnknownLabel  = errors.New("unknown label")
 	ErrTagGitBranch  = errors.New("tag-git-branch failed")
 	ErrMissingFlag   = errors.New("missing required flag")
 	ErrNoCredentials = errors.New("missing required credentials")
@@ -115,17 +116,6 @@ func init() {
 			return "", ErrMissingName
 		}
 
-		if !p.Exists("interactive") {
-			p.Set("interactive", "true")
-		} else if p.IsFalse("interactive") {
-			p.Pick("interactive")
-		}
-		if !p.Exists("tty") {
-			p.Set("tty", "true")
-		} else if p.IsFalse("tty") {
-			p.Pick("tty")
-		}
-
 		dockerArgCommand := p.Get("command")
 		if len(args) > 0 {
 			dockerArgCommand = args[0]
@@ -152,6 +142,29 @@ func init() {
 		}
 
 		return buildDockerStr("exec", pf, nargs...), nil
+	}
+
+	DockerCommands["shell"] = func(c *collect.Collector, p *data.Data, args []string) (str string, err error) {
+
+		p.SetTrue("interactive")
+		p.SetTrue("tty")
+		p.SetFalse("detach")
+
+		name := p.Get("name")
+		if name == "" {
+			return "", ErrMissingName
+		}
+
+		if !p.Exists("shell") {
+			p.Set("shell", "/bin/bash")
+		}
+
+		pf, err := filterDockerFlags(p, "exec")
+		if err != nil {
+			return "", err
+		}
+
+		return buildDockerStr("exec", pf, name, p.Get("shell")), nil
 	}
 
 	DockerCommands["destroy"] = func(c *collect.Collector, p *data.Data, args []string) (str string, err error) {
@@ -229,9 +242,16 @@ func init() {
 	}
 
 	Commands["show-data"] = func(c *collect.Collector, p *data.Data, args []string) error {
-		if len(args) > 0 {
+		// fmt.Printf("Showing data for label: %v", c.Label())
+
+		if len(args) > 1 {
 			return ErrTooManyArgs
 		}
+
+		if c.Label() == "" {
+			return ErrUnknownLabel
+		}
+
 		out, err := yaml.Marshal(p.RawEnhanced())
 		if err != nil {
 			return err
@@ -258,12 +278,15 @@ func init() {
 	}
 
 	Commands["images"] = func(c *collect.Collector, p *data.Data, args []string) error {
+		registryStr := ""
+		if len(args) > 0 {
+			registryStr = args[0]
+			args = args[1:]
+		}
+
 		if len(args) > 0 {
 			return ErrTooManyArgs
 		}
-
-		// label is actually registryStr arg
-		registryStr := c.Label()
 
 		// show local docker images
 		if registryStr == "" {
