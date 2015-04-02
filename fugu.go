@@ -242,14 +242,8 @@ func init() {
 	}
 
 	Commands["show-data"] = func(c *collect.Collector, p *data.Data, args []string) error {
-		// fmt.Printf("Showing data for label: %v", c.Label())
-
 		if len(args) > 1 {
 			return ErrTooManyArgs
-		}
-
-		if c.Label() == "" {
-			return ErrUnknownLabel
 		}
 
 		out, err := yaml.Marshal(p.RawEnhanced())

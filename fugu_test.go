@@ -659,7 +659,7 @@ func TestShowData(t *testing.T) {
 		testDesc:       "show-data no output",
 		command:        "show-data",
 		argsIn:         []string{"label3", "--source=file://examples/fugu.labels.yml"},
-		errOut:         ErrUnknownLabel,
+		errOut:         nil,
 		stdoutContains: []string{},
 	}).Test(t)
 }
