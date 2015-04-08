@@ -31,26 +31,15 @@ and [example fugu.yml files](https://github.com/mattes/fugu/tree/v1/examples).
 
 ```bash
 # Mac OS X
-curl -L https://github.com/mattes/fugu/releases/download/v1.1.0/fugu.v1.1.0.darwin.x86_64.tar.gz | tar xvz
-mv fugu.v1.1.0.darwin.x86_64 /usr/local/bin/fugu
+curl -L https://github.com/mattes/fugu/releases/download/v1.1.1/fugu.v1.1.1.darwin.x86_64.tar.gz | tar xvz
+mv fugu.v1.1.1.darwin.x86_64 /usr/local/bin/fugu
 chmod +x /usr/local/bin/fugu
 
 # Linux
-curl -L https://github.com/mattes/fugu/releases/download/v1.1.0/fugu.v1.1.0.linux.x86_64.tar.gz | tar xvz
-mv fugu.v1.1.0.linux.x86_64 /usr/local/bin/fugu
+curl -L https://github.com/mattes/fugu/releases/download/v1.1.1/fugu.v1.1.1.linux.x86_64.tar.gz | tar xvz
+mv fugu.v1.1.1.linux.x86_64 /usr/local/bin/fugu
 chmod +x /usr/local/bin/fugu
 ```
-
-# Why fugu?
-
-We created [developermail.io - A mailbox built for developers](https://developermail.io).
-The project uses a microservice architecture and consists of lots of docker images. 
-During development a docker container is built, run and destroyed quite often.
-With fugu we can speed up this workflow, because all ``docker`` options
-are stored in a ``fugu.yml`` file. 
-We also used to put ``docker run`` statements 
-in ``README.md``, but the format wasn't consistent. Now ``fugu.yml`` is our second point of contact 
-(after the ``Dockerfile`` itself), when looking at a docker image.
 
 
 ## How is this different from docker-compose/ fig?
