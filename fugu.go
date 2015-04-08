@@ -246,6 +246,16 @@ func init() {
 			return ErrTooManyArgs
 		}
 
+		found := false
+		for _, l := range c.Labels() {
+			if l == c.Label() {
+				found = true
+			}
+		}
+		if !found {
+			return nil
+		}
+
 		out, err := yaml.Marshal(p.RawEnhanced())
 		if err != nil {
 			return err

@@ -228,11 +228,19 @@ func TestCommandRun(t *testing.T) {
 	}).Test(t)
 
 	(&DockerCommandTest{
+		testDesc: "plain run without label",
+		command:  "run",
+		argsIn:   []string{"--source=file://examples/fugu.simple.yml"},
+		strOut:   "docker run --name=my-ubuntu ubuntu",
+		errOut:   nil,
+	}).Test(t)
+
+	(&DockerCommandTest{
 		testDesc: "plain run with unknown label",
 		command:  "run",
 		argsIn:   []string{"label-unknown", "--source=file://examples/fugu.labels.yml"},
-		strOut:   "",
-		errOut:   ErrMissingImage,
+		strOut:   "docker run --name=my-redis redis label-unknown",
+		errOut:   nil,
 	}).Test(t)
 
 	(&DockerCommandTest{
@@ -256,6 +264,22 @@ func TestCommandRun(t *testing.T) {
 		command:  "run",
 		argsIn:   []string{"--image=foo", "--source=file://examples/fugu.labels.yml", "cmd"},
 		strOut:   "docker run --name=my-redis foo cmd",
+		errOut:   nil,
+	}).Test(t)
+
+	(&DockerCommandTest{
+		testDesc: "get docker command from args (without label)",
+		command:  "run",
+		argsIn:   []string{"--image=foo", "--source=file://examples/fugu.simple.yml", "cmd"},
+		strOut:   "docker run --name=my-ubuntu foo cmd",
+		errOut:   nil,
+	}).Test(t)
+
+	(&DockerCommandTest{
+		testDesc: "get docker command from args (without label) 2",
+		command:  "run",
+		argsIn:   []string{"--source=file://examples/fugu.simple.yml", "cmd"},
+		strOut:   "docker run --name=my-ubuntu ubuntu cmd",
 		errOut:   nil,
 	}).Test(t)
 
@@ -353,8 +377,8 @@ func TestCommandExec(t *testing.T) {
 		testDesc: "plain exec with unknown label",
 		command:  "exec",
 		argsIn:   []string{"label-unknown", "--source=file://examples/fugu.labels.yml"},
-		strOut:   "",
-		errOut:   ErrMissingName,
+		strOut:   "docker exec my-redis label-unknown",
+		errOut:   nil,
 	}).Test(t)
 
 	(&DockerCommandTest{
@@ -502,7 +526,7 @@ func TestCommandDestroy(t *testing.T) {
 		command:  "destroy",
 		argsIn:   []string{"label-unknown", "--source=file://examples/fugu.labels.yml"},
 		strOut:   "",
-		errOut:   ErrMissingName,
+		errOut:   ErrTooManyArgs,
 	}).Test(t)
 
 	(&DockerCommandTest{
@@ -543,8 +567,8 @@ func TestCommandPush(t *testing.T) {
 		testDesc: "plain push with unknown label",
 		command:  "push",
 		argsIn:   []string{"label-unknown", "--source=file://examples/fugu.labels.yml"},
-		strOut:   "",
-		errOut:   ErrMissingImage,
+		strOut:   "docker push redis:label-unknown",
+		errOut:   nil,
 	}).Test(t)
 
 	(&DockerCommandTest{
@@ -609,8 +633,8 @@ func TestCommandPull(t *testing.T) {
 		testDesc: "plain pull with unknown label",
 		command:  "pull",
 		argsIn:   []string{"label-unknown", "--source=file://examples/fugu.labels.yml"},
-		strOut:   "",
-		errOut:   ErrMissingImage,
+		strOut:   "docker pull redis:label-unknown",
+		errOut:   nil,
 	}).Test(t)
 
 	(&DockerCommandTest{

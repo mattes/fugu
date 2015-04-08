@@ -97,6 +97,7 @@ func dockerCommand(c *collect.Collector, command string, args []string) {
 		fugu.FuguFlags[command],
 		fugu.DockerFlags[command],
 	)
+
 	if err != nil {
 		fuguErrExit(err)
 	}

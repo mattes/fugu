@@ -53,6 +53,9 @@ func (s *File) Load(label string, u *url.URL) (*data.Data, error) {
 	}
 
 	s.label = s.selectLabel(label)
+	if s.label == "" {
+		s.label = s.selectLabel("")
+	}
 
 	return s.getData(), nil
 }
