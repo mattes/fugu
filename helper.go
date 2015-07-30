@@ -47,9 +47,8 @@ func buildDockerStr(command string, p *data.Data, args ...string) string {
 	for _, n := range p.Keys() {
 		for _, o := range p.GetAll(n) {
 
-			o, err := tilde.Expand(o)
-			if err != nil {
-				fmt.Println(err)
+			if n == "volume" {
+				o = expandTilde(o)
 			}
 
 			nice := strings.TrimSpace(flags.Nice(n, o))
@@ -63,6 +62,16 @@ func buildDockerStr(command string, p *data.Data, args ...string) string {
 	str = append([]string{"docker", command}, str...)
 	str = append(str, args...)
 	return strings.Join(str, " ")
+}
+
+func expandTilde(path string) string {
+
+	retval, err := tilde.Expand(path)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return retval
 }
 
 func currentGitBranch() (shortname string, err error) {
