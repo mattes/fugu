@@ -357,7 +357,7 @@ func TestCommandRun(t *testing.T) {
 		testDesc: "command with volume flag",
 		command:  "run",
 		argsIn:   []string{"--image=foo", "--source=file://examples/fugu.volumes.yml"},
-		strOut:   "docker run --name=my-ubuntu --volume=/tmp --volume=" + usr.HomeDir + "/Go:/root/Go foo",
+		strOut:   "docker run --name=my-ubuntu --volume=" + usr.HomeDir + "/Go:/root/Go --volume=/tmp foo",
 		errOut:   nil,
 	}).Test(t)
 }
