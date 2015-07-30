@@ -346,6 +346,14 @@ func TestCommandRun(t *testing.T) {
 		strOut:   "docker run --name=my-redis foo a b",
 		errOut:   nil,
 	}).Test(t)
+
+	(&DockerCommandTest{
+		testDesc: "command with volume flag",
+		command:  "run",
+		argsIn:   []string{"--image=foo", "--source=file://examples/fugu.volumes.yml"},
+		strOut:   "docker run --name=my-ubuntu --volume=/tmp foo",
+		errOut:   nil,
+	}).Test(t)
 }
 
 func TestCommandExec(t *testing.T) {
