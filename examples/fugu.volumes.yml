@@ -1,3 +1,5 @@
 image: ubuntu
 name: my-ubuntu
-volume: /tmp
+volume:
+ - /tmp
+ - ~/Go:/root/Go

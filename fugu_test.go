@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"testing"
 
 	fileSource "github.com/mattes/go-collect/source/file"
@@ -347,11 +348,16 @@ func TestCommandRun(t *testing.T) {
 		errOut:   nil,
 	}).Test(t)
 
+	usr, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+
 	(&DockerCommandTest{
 		testDesc: "command with volume flag",
 		command:  "run",
 		argsIn:   []string{"--image=foo", "--source=file://examples/fugu.volumes.yml"},
-		strOut:   "docker run --name=my-ubuntu --volume=/tmp foo",
+		strOut:   "docker run --name=my-ubuntu --volume=/tmp --volume=" + usr.HomeDir + "/Go:/root/Go foo",
 		errOut:   nil,
 	}).Test(t)
 }
