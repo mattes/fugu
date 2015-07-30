@@ -7,6 +7,7 @@ import (
 	"github.com/github/hub/github"
 	"github.com/mattes/go-collect/data"
 	"github.com/mattes/go-collect/flags"
+	"gopkg.in/mattes/go-expand-tilde.v1"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -45,6 +46,12 @@ func buildDockerStr(command string, p *data.Data, args ...string) string {
 	str := []string{}
 	for _, n := range p.Keys() {
 		for _, o := range p.GetAll(n) {
+
+			o, err := tilde.Expand(o)
+			if err != nil {
+				fmt.Println(err)
+			}
+
 			nice := strings.TrimSpace(flags.Nice(n, o))
 			if nice != "" {
 				str = append(str, nice)
