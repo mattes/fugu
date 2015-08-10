@@ -70,6 +70,8 @@ func init() {
 	DockerFlags["run"].String([]string{"-ipc"}, "", "Default is to create a private IPC namespace (POSIX SysV IPC) for the container\n'container:<name|id>': reuses another container shared memory, semaphores and message queues\n'host': use the host shared memory,semaphores and message queues inside the container.  Note: the host mode gives the container full access to local shared memory and is therefore considered insecure.")
 	DockerFlags["run"].String([]string{"-restart"}, "", "Restart policy to apply when a container exits (no, on-failure[:max-retry], always)")
 	DockerFlags["run"].Bool([]string{"-read-only"}, false, "Mount the container's root filesystem as read only")
+	DockerFlags["run"].String([]string{"#log-driver", "-log-driver"}, "json-file", "Logging driver for container")
+	DockerFlags["run"].Var([]string{"-log-opt"}, "Log driver options")
 
 	// Define DockerFlags["exec"]
 	DockerFlags["exec"] = flags.New("docker")
