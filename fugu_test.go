@@ -360,6 +360,14 @@ func TestCommandRun(t *testing.T) {
 		strOut:   "docker run --name=my-ubuntu --volume=" + usr.HomeDir + "/Go:/root/Go --volume=/tmp foo",
 		errOut:   nil,
 	}).Test(t)
+
+	(&DockerCommandTest{
+		testDesc: "command with log-driver and log-opt flag",
+		command:  "run",
+		argsIn:   []string{"--image=foo", "--source=file://examples/fugu.log-driver.yml"},
+		strOut:   "docker run --log-driver=syslog --log-opt=syslog-address=tcp://192.168.0.42:123 --name=my-ubuntu foo",
+		errOut:   nil,
+	}).Test(t)
 }
 
 func TestCommandExec(t *testing.T) {
